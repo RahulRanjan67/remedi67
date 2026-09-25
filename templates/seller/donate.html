@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="max-width:600px;margin-top:2rem;">
+    <div class="card">
+        <h2>Donate Medicine</h2>
+        <form method="POST" action="{{ url_for('seller.donate') }}">
+            <div class="form-group">
+                <label class="form-label">Medicine Name</label>
+                <input type="text" name="medicine_name" list="meds" class="form-control" required>
+                <datalist id="meds">{% for m in medicines %}<option value="{{ m.medicine_name }}">{% endfor %}</datalist>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select name="category_id" class="form-select">
+                    <option value="">-- Optional --</option>
+                    {% for c in categories %}<option value="{{ c.category_id }}">{{ c.category_name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Quantity</label>
+                <input type="number" name="quantity" min="1" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Batch Number</label>
+                <input type="text" name="batch_number" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input type="date" name="expiry_date" class="form-control" required>
+                <small class="text-muted">Must have at least 60 days remaining.</small>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Condition</label>
+                <div>
+                    <label><input type="radio" name="condition_status" value="sealed" checked> Sealed</label>
+                    <label style="margin-left:1rem;"><input type="radio" name="condition_status" value="opened"> Opened</label>
+                    <label style="margin-left:1rem;"><input type="radio" name="condition_status" value="partial"> Partial</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Locality</label>
+                <input type="text" name="locality" class="form-control" value="{{ current_user.locality or '' }}" required>
+            </div>
+            <p class="text-muted">City: {{ current_user.city }} (donations are posted in your registered city)</p>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Submit Donation</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

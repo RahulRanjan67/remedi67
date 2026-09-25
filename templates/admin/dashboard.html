@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="container" style="padding:2rem 1rem">
+<h2>Admin Dashboard</h2>
+<p style="color:var(--text-muted);margin-bottom:1.5rem">Statistics and NGO approvals for <span class="cityname">{{ label }}</span>.</p>
+<div class="dashboard-grid">
+<div class="card stat-card"><div class="num">{{ stats.total }}</div><div>Total Users</div></div>
+<div class="card stat-card"><div class="num">{{ stats.sellers }}</div><div>Sellers</div></div>
+<div class="card stat-card"><div class="num">{{ stats.buyers }}</div><div>Buyers</div></div>
+<div class="card stat-card"><div class="num">{{ stats.ngos }}</div><div>NGOs</div></div>
+<div class="card stat-card"><div class="num" style="color:var(--warning)">{{ stats.pending }}</div><div>Pending NGOs</div></div>
+<div class="card stat-card"><div class="num">{{ stats.donations }}</div><div>Total Donations</div></div>
+<div class="card stat-card"><div class="num" style="color:var(--success)">{{ stats.verified }}</div><div>Verified Donations</div></div>
+<div class="card stat-card"><div class="num" style="color:var(--warning)">{{ stats.waiting }}</div><div>Pending Donations</div></div>
+<div class="card stat-card"><div class="num">{{ stats.stock }}</div><div>Inventory Items</div></div>
+<div class="card stat-card"><div class="num" style="color:var(--info)">{{ stats.requests }}</div><div>Pending Requests</div></div>
+<div class="card stat-card"><div class="num" style="color:var(--danger)">{{ stats.needs }}</div><div>Open Urgent Needs</div></div>
+</div>
+<div class="card">
+<h3>Pending NGO Approvals</h3>
+{% if pending %}
+<div class="table-responsive">
+<table>
+<thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Action</th></tr></thead>
+<tbody>
+{% for n in pending %}
+<tr>
+<td>{{ n.name }}</td>
+<td>{{ n.email }}</td>
+<td>{{ n.phone or '--' }}</td>
+<td>{{ n.city or '--' }}</td>
+<td>
+<form method="POST" action="{{ url_for('admin.approve', uid=n.user_id) }}" style="display:inline">
+<button class="btn btn-primary btn-sm" type="submit">Approve</button>
+</form>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="empty-state"><p>No pending NGO approvals.</p></div>
+{% endif %}
+</div>
+<div style="margin-top:1rem">
+<a href="{{ url_for('admin.users') }}" class="btn btn-secondary">View All Users</a>
+{% if current_user.role == 'developer' %}
+<a href="{{ url_for('admin.devdash') }}" class="btn btn-secondary" style="margin-left:0.5rem">Dev Stats</a>
+{% endif %}
+</div>
+</div>
+{% endblock %}

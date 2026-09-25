@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Register Pharmacy{% endblock %}
+{% block content %}
+<div class="container" style="max-width:600px;margin-top:3rem;margin-bottom:3rem;">
+    <div class="card">
+        <h2 style="text-align:center;margin-bottom:1rem;">Register Pharmacy</h2>
+        <p class="text-muted" style="text-align:center;margin-bottom:2rem;">Register your pharmacy to become a verified local intermediary and exchange center for safe medicine handoffs.</p>
+        <form method="POST" action="{{ url_for('common.pharmadd') }}">
+            <div class="form-group">
+                <label class="form-label">Pharmacy Name <span style="color:var(--danger)">*</span></label>
+                <input type="text" name="name" class="form-control" placeholder="e.g. HealthCare Pharmacy" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Address <span style="color:var(--danger)">*</span></label>
+                <input type="text" name="address" class="form-control" placeholder="Street, Shop No., Area" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">City <span style="color:var(--danger)">*</span></label>
+                <select name="city" class="form-select" required>
+                    {% for c in cities %}<option value="{{ c }}" {% if c == city %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">PIN Code <span style="color:var(--danger)">*</span></label>
+                <input type="text" name="pincode" class="form-control" placeholder="6-digit PIN code" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Contact Phone</label>
+                <input type="text" name="phone" class="form-control" placeholder="Phone or Mobile Number">
+            </div>
+            <div class="alert alert-info" style="font-size:0.875rem;margin-top:1rem;">ReMedi directs recipients and donors to designated pharmacies for physical verification and exchange.</div>
+            <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1rem;">Complete Pharmacy Registration</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

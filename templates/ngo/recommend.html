@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="max-width:600px;margin-top:2rem;">
+    <div class="card">
+        <h2>Recommend Alternative</h2>
+        <p><strong>Original Request:</strong> {{ r.buyer_name }} requested {{ r.quantity_requested }}x {{ r.medicine_name }}</p>
+        <form method="POST" action="{{ url_for('ngo.suggest', rid=r.request_id) }}">
+            <div class="form-group">
+                <label class="form-label">Recommended Medicine (from your {{ r.city }} stock)</label>
+                <select name="recommended_medicine_id" class="form-select" required>
+                    {% for m in items %}
+                    <option value="{{ m.medicine_id }}">{{ m.medicine_name }} (Qty: {{ m.quantity_available }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Pharmacy for Exchange</label>
+                <select name="pharmacy_id" class="form-select" required>
+                    {% for p in pharmacies %}
+                    <option value="{{ p.pharmacy_id }}">{{ p.name }} - {{ p.address }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Reason</label>
+                <textarea name="reason" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="alert alert-warning">
+                <strong>Important:</strong> Exchange will take place at the selected pharmacy. Physical pharmacist approval is required. ReMedi only provides the pharmacy address and is not responsible for validating the exchange.
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Submit Recommendation</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

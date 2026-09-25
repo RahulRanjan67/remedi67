@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <h2>My Contact Requests</h2>
+    <div class="card table-responsive">
+        <table>
+            <tr><th>Seller</th><th>Medicine</th><th>City</th><th>Status</th><th>Date</th><th>Contact Info</th></tr>
+            {% for r in requests %}
+            <tr>
+                <td>{{ r.seller_name or '-' }}</td>
+                <td>{{ r.medicine_name }}</td>
+                <td>{{ r.city }}</td>
+                <td><span class="badge badge-{{ r.status|lower }}">{{ r.status|capitalize }}</span></td>
+                <td>{{ r.requested_at }}</td>
+                <td>
+                    {% if r.status == 'approved' %}
+                        Phone: {{ r.seller_phone }}<br>Email: {{ r.seller_email }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="empty-state">No contact requests made.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

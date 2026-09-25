@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div class="container" style="padding:2rem 1rem">
+<h2>User Management</h2>
+<p style="color:var(--text-muted);margin-bottom:1rem">Showing users in <span class="cityname">{{ label }}</span>.</p>
+<div class="table-responsive">
+<table>
+<thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>City</th><th>Status</th><th>Joined</th><th>Action</th></tr></thead>
+<tbody>
+{% for u in users %}
+<tr>
+<td>{{ u.user_id }}</td>
+<td>{{ u.name }}</td>
+<td>{{ u.email }}</td>
+<td><span class="badge badge-{{ u.role }}">{{ u.role|capitalize }}</span></td>
+<td>{{ u.city or '-' }}</td>
+<td>{% if u.is_approved %}<span class="badge badge-verified">Active</span>{% else %}<span class="badge badge-pending">Pending</span>{% endif %}</td>
+<td>{{ (u.created_at|string)[:10] if u.created_at else '-' }}</td>
+<td>
+{% if u.role == 'ngo' and not u.is_approved %}
+<form method="POST" action="{{ url_for('admin.approve', uid=u.user_id) }}" style="display:inline">
+<button class="btn btn-primary btn-sm" type="submit">Approve NGO</button>
+</form>
+{% else %}-{% endif %}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endblock %}

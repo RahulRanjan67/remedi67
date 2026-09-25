@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <h2>NGO Dashboard</h2>
+    <div class="dashboard-grid">
+        <div class="card stat-card"><div class="num" style="color:var(--warning)">{{ stats.donations }}</div><div>Pending Donations</div></div>
+        <div class="card stat-card"><div class="num" style="color:var(--info)">{{ stats.requests }}</div><div>Pending Requests</div></div>
+        <div class="card stat-card"><div class="num" style="color:var(--success)">{{ stats.stock }}</div><div>Inventory Items</div></div>
+    </div>
+    <div class="card">
+        <h3>Quick Actions</h3>
+        <a href="{{ url_for('ngo.verify') }}" class="btn btn-primary">Verify Donations</a>
+        <a href="{{ url_for('ngo.manage') }}" class="btn btn-secondary">Manage Requests</a>
+    </div>
+</div>
+{% endblock %}
