@@ -1,5 +1,6 @@
 # ReMedi
 
+<<<<<<< HEAD
 Medicine donation platform connecting sellers, NGOs, buyers and pharmacies, city by city.
 
 ## Project layout
@@ -42,12 +43,16 @@ cp .env.example .env               # fill in your local MySQL credentials
 python init_db.py --seed           # creates tables + loads sample data for all 10 cities
 python app.py                      # http://127.0.0.1:5000
 ```
+=======
+Medicine donation platform connecting sellers, NGOs, buyers and pharmacies, city by city. Made using Flask at its core , this app seeks to solve the issue of leftover medicines going to waste while those in need stranded. This project was my experimentation using flask and many of codes have been completely manually written by me especially the routes etc.
+>>>>>>> 5a99053c961840931d931a125222767de5151472
 
 Sample login (any account, password `remedi123`): `dev@remedi.in` (developer),
 `admin@remedi.in` (admin), `bhopal.seller1@remedi.in`, `bhopal.buyer1@remedi.in`,
 `ngo.seva@remedi.in` (Bhopal NGO), etc. — see `database/sample.sql` for the full list,
 one seller/buyer pair and one NGO per city.
 
+<<<<<<< HEAD
 ## Deploying to GitHub + Vercel
 
 1. Push this folder as a GitHub repo (the `.gitignore` already excludes `.env`,
@@ -75,6 +80,8 @@ Note: each request opens its own short-lived MySQL connection (`db.py`), which
 keeps the code simple but adds a little latency on a cold serverless function.
 For a class project this is fine; if it ever needs to scale, that's the first
 thing to revisit (e.g. a connection pool).
+=======
+>>>>>>> 5a99053c961840931d931a125222767de5151472
 
 ## Geofencing rules
 
@@ -85,6 +92,7 @@ thing to revisit (e.g. a connection pool).
   posted it from.
 - NGO and developer accounts are not restricted by any city: their dashboards,
   search, and the NGO donation-verification queue show every city at once.
+<<<<<<< HEAD
 
 ## Tests
 
@@ -94,3 +102,5 @@ python -m unittest tests/test_logic.py -v
 
 Covers the pure-logic helpers (city matching, expiry classification, donor
 tiers). It doesn't touch the database.
+=======
+>>>>>>> 5a99053c961840931d931a125222767de5151472
