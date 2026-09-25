@@ -1,6 +1,6 @@
 import os
-cities=["Bhopal","Ranchi","Delhi","Mumbai","Bengaluru","Hyderabad","Ahmedabad","Chennai","Kolkata","Pune"]
-defcity="Bhopal"
+cities=["Demo City "+str(n) for n in range(1,11)]
+defcity="Demo City 1"
 path=os.path.join(os.path.dirname(os.path.abspath(__file__)),".env")
 if(os.path.exists(path)):
     with open(path,encoding="utf-8-sig") as f:
