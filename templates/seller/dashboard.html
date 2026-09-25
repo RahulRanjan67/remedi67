@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
+        <h2>Seller Dashboard</h2>
+        <div><span class="tier-badge tier-{{ tier|lower }}">{{ tier }} Donor</span></div>
+    </div>
+    <div class="dashboard-grid">
+        <div class="card stat-card"><div class="num">{{ stats.total }}</div><div>Total Donations</div></div>
+        <div class="card stat-card"><div class="num" style="color:var(--warning)">{{ stats.pending }}</div><div>Pending</div></div>
+        <div class="card stat-card"><div class="num" style="color:var(--success)">{{ stats.verified }}</div><div>Verified</div></div>
+        <div class="card stat-card"><div class="num" style="color:var(--info)">{{ waiting }}</div><div>Pending Contacts</div></div>
+    </div>
+    <div class="card">
+        <h3>Quick Actions</h3>
+        <a href="{{ url_for('seller.donate') }}" class="btn btn-primary">Donate Medicine</a>
+        <a href="{{ url_for('seller.contacts') }}" class="btn btn-secondary">View Contact Requests</a>
+    </div>
+</div>
+{% endblock %}

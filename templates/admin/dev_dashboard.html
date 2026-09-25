@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Developer Dashboard{% endblock %}
+{% block content %}
+<div class="container" style="padding:2rem 1rem">
+<h2>Developer Dashboard</h2>
+<p style="color:var(--text-muted);margin-bottom:2rem">Database table statistics - live counts from MySQL across all cities.</p>
+<div class="dashboard-grid">
+{% for table, count in counts.items() %}
+<div class="card stat-card">
+<div class="icon">🗄️</div>
+<div class="num">{{ count }}</div>
+<div style="color:var(--text-muted);font-size:0.9rem">{{ table|replace('_',' ')|title }}</div>
+</div>
+{% endfor %}
+</div>
+<hr style="margin:2rem 0">
+<h3>Quick Admin Actions</h3>
+<div style="margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap">
+<a href="{{ url_for('admin.dash') }}" class="btn btn-secondary">Platform Stats</a>
+<a href="{{ url_for('admin.users') }}" class="btn btn-secondary">Manage Users</a>
+</div>
+</div>
+{% endblock %}

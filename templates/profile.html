@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="max-width:600px;margin-top:2rem;">
+    <div class="card" style="text-align:center;">
+        <div class="profile-avatar">{{ current_user.name[:2]|upper }}</div>
+        <h2>{{ current_user.name }}</h2>
+        <p><span class="badge badge-info">{{ current_user.role|capitalize }}</span></p>
+        <hr style="margin:1.5rem 0;border:0;border-top:1px solid var(--border);">
+        <div style="text-align:left;">
+            <p><strong>Email:</strong> {{ current_user.email }}</p>
+            <p><strong>Phone:</strong> {{ current_user.phone }}</p>
+            <p><strong>Location:</strong> {{ current_user.locality }}, {{ current_user.city }} ({{ current_user.pincode }})</p>
+            <p><strong>Member since:</strong> {{ current_user.created_at }}</p>
+            {% if current_user.role == 'seller' %}
+                <p><strong>Donor Tier:</strong> {{ tier }}</p>
+                <p><strong>Verified Donations:</strong> {{ count }}</p>
+            {% endif %}
+            <p><strong>Account Status:</strong> <span class="badge badge-approved">Active</span></p>
+        </div>
+    </div>
+    <div class="card">
+        <h3>Edit Profile</h3>
+        <form method="POST" action="{{ url_for('common.profedit') }}">
+            <div class="form-group"><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="{{ current_user.name }}" required></div>
+            <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" value="{{ current_user.phone or '' }}"></div>
+            <div class="form-group">
+                <label class="form-label">City</label>
+                <select name="city" class="form-select">
+                    {% for c in cities %}<option value="{{ c }}" {% if c == current_user.city %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group"><label class="form-label">Pincode</label><input type="text" name="pincode" class="form-control" value="{{ current_user.pincode or '' }}"></div>
+            <div class="form-group"><label class="form-label">Locality</label><input type="text" name="locality" class="form-control" value="{{ current_user.locality or '' }}"></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Save Changes</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

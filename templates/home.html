@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="hero">
+    <div class="container">
+        <h1>Give Unused Medicines a Second Life</h1>
+        <p>Connecting donors, NGOs, and people who need medicines safely and locally.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;">
+            <a href="{{ url_for('common.search') }}" class="btn btn-secondary" style="background:white;color:var(--primary);border:none;">Find Medicines</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="border:1px solid white;">Donate Medicine</a>
+        </div>
+        <p style="margin-top:1.5rem;margin-bottom:0;font-size:1rem;">📍 Live figures for {{ label }}</p>
+    </div>
+</div>
+<div class="container">
+    <div class="stats-grid">
+        <div class="card stat-card"><div class="icon">✅</div><div class="num">{{ stats.verified }}</div><div>Verified Donations</div></div>
+        <div class="card stat-card"><div class="icon">💊</div><div class="num">{{ stats.avail }}</div><div>Available Medicines</div></div>
+        <div class="card stat-card"><div class="icon">👥</div><div class="num">{{ stats.users }}</div><div>Registered Users</div></div>
+        <div class="card stat-card"><div class="icon">🏥</div><div class="num">{{ stats.fulfilled }}</div><div>Urgent Needs Fulfilled</div></div>
+    </div>
+    <h2 style="text-align:center;margin-top:4rem;">How ReMedi Works</h2>
+    <div class="workflow-steps">
+        <div class="step"><div class="step-icon">1</div><h4>Donate</h4><p>Sellers post medicines</p></div>
+        <div class="step"><div class="step-icon">2</div><h4>Verify</h4><p>NGOs inspect items</p></div>
+        <div class="step"><div class="step-icon">3</div><h4>Store</h4><p>Added to inventory</p></div>
+        <div class="step"><div class="step-icon">4</div><h4>Request</h4><p>Buyers request needs</p></div>
+        <div class="step"><div class="step-icon">5</div><h4>Get</h4><p>Safe collection</p></div>
+    </div>
+    <h2 style="text-align:center;margin-top:4rem;">Features</h2>
+    <div class="feature-grid">
+        <div class="card"><h3>💊 Donate Medicines</h3><p>Sellers donate unused medicines safely.</p></div>
+        <div class="card"><h3>✅ NGO Verification</h3><p>Certified NGOs verify and manage donations.</p></div>
+        <div class="card"><h3>🔍 Search Inventory</h3><p>Buyers search available medicines in their city.</p></div>
+        <div class="card"><h3>📋 Request System</h3><p>Request specific quantities easily.</p></div>
+        <div class="card"><h3>🏪 Pharmacy Network</h3><p>Exchange medicines safely via pharmacies in your city.</p></div>
+        <div class="card"><h3>🚨 Urgent Needs</h3><p>Post and fulfill urgent medicine requests.</p></div>
+    </div>
+    <div class="card" style="text-align:center;background:var(--primary-light);">
+        <h3>We operate city by city to ensure medicines reach those who need them locally.</h3>
+    </div>
+    <div style="text-align:center;margin:4rem 0;">
+        <h2>Ready to help?</h2>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Register Now</a>
+    </div>
+</div>
+{% endblock %}

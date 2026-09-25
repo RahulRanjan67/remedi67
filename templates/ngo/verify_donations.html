@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-wide" style="margin-top:2rem;">
+    <h2>Verify Donations</h2>
+    {% if donations %}
+    <form method="POST" action="{{ url_for('ngo.bulkverify') }}" id="bulk-form">
+    <div class="card table-responsive">
+        <table>
+            <tr>
+                <th><input type="checkbox" id="select-all" title="Select all"></th>
+                <th>Seller</th><th>Medicine</th><th>Qty</th><th>Condition</th><th>Expiry</th><th>Batch</th><th>Correct Medicine</th><th>Action</th>
+            </tr>
+            {% for d in donations %}
+            <tr>
+                <td><input type="checkbox" name="donation_ids" value="{{ d.donation_id }}" class="row-cb"></td>
+                <td>{{ d.seller_name }}</td>
+                <td>{{ d.medicine_name }}<br><small class="text-muted">{{ d.category_name or '' }}</small></td>
+                <td>{{ d.quantity }}</td>
+                <td><span class="badge badge-{{ (d.condition_status or '')|lower }}">{{ d.condition_status or 'N/A' }}</span></td>
+                <td><span class="expiry-{{ d.exp }}">{{ d.expiry_date }}</span></td>
+                <td>{{ d.batch_number }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('ngo.accept', did=d.donation_id) }}" style="margin:0;">
+                        <select name="corrected_medicine_id" class="form-control form-control-sm" style="min-width:140px;">
+                            <option value="">-- Keep original --</option>
+                            {% for m in medicines %}
+                            <option value="{{ m.medicine_id }}" {% if m.medicine_id == d.medicine_id %}selected{% endif %}>{{ m.medicine_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary" style="margin-top:0.3rem;">Verify</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="POST" action="{{ url_for('ngo.decline', did=d.donation_id) }}" style="margin:0;">
+                        <input type="text" name="reason" placeholder="Reason" class="form-control form-control-sm">
+                        <button type="submit" class="btn btn-sm btn-danger" style="margin-top:0.3rem;" data-confirm="Reject this donation?">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="card">
+        <h4>Bulk Actions</h4>
+        <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+            <button type="submit" form="bulk-form" formaction="{{ url_for('ngo.bulkverify') }}" class="btn btn-primary">Verify Selected</button>
+            <button type="submit" form="bulk-form" formaction="{{ url_for('ngo.bulkdecline') }}" class="btn btn-danger">Reject Selected</button>
+            <input type="text" name="reason" placeholder="Rejection reason..." class="form-control" style="width:200px;" form="bulk-form">
+        </div>
+    </div>
+    </form>
+    {% else %}
+    <div class="card empty-state">No pending donations in {{ sel or 'any city' }}.</div>
+    {% endif %}
+</div>
+{% endblock %}

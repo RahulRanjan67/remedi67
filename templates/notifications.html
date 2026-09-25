@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;max-width:800px;">
+    <h2 style="margin-bottom:1.5rem;">Notifications</h2>
+    {% for n in notifications %}
+    <div class="card" style="padding:1rem;{% if not n.is_read %}background:var(--primary-light);border-left:4px solid var(--primary);{% endif %}">
+        <p style="margin:0;">{{ n.message }}</p>
+        <small class="text-muted">{{ n.created_at }}</small>
+    </div>
+    {% else %}
+    <div class="empty-state">No notifications.</div>
+    {% endfor %}
+</div>
+{% endblock %}

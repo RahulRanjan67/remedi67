@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+            <h2>Find Nearby Pharmacies</h2>
+            <p class="text-muted">Showing exchange pharmacies in <strong>{{ label }}</strong>. Enter a PIN code to narrow the results.</p>
+        </div>
+        <a href="{{ url_for('common.pharmadd') }}" class="btn btn-secondary">+ Register Pharmacy</a>
+    </div>
+    <div class="card" style="max-width:500px;margin:0 auto 2rem;">
+        <div style="display:flex;gap:1rem;">
+            <input type="text" id="pincode-search" class="form-control" placeholder="Enter PIN code">
+            <button id="pharmacy-search-btn" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+    <div class="alert alert-info" style="max-width:800px;margin:0 auto 2rem;">Pharmacy exchanges require physical pharmacist approval. ReMedi only facilitates the connection.</div>
+    <div id="pharmacy-results" class="dashboard-grid">
+        {% for p in pharmacies %}
+        <div class="card pharmacy-card">
+            <h4>{{ p.name }}</h4>
+            <p><strong>Address:</strong> {{ p.address }}</p>
+            <p><strong>City & PIN:</strong> {{ p.city }} - {{ p.pincode }}</p>
+            {% if p.phone %}<p><strong>Phone:</strong> {{ p.phone }}</p>{% endif %}
+            <span class="badge badge-approved" style="align-self:flex-start;margin-top:0.5rem;">Verified Partner</span>
+        </div>
+        {% else %}
+        <div class="empty-state"><p>No registered pharmacies yet. Register your local pharmacy!</p></div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

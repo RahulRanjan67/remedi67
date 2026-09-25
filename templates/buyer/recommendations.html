@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <h2>Recommendations</h2>
+    {% for r in recommendations %}
+    <div class="card rec-card">
+        <h4>NGO Recommendation <small class="text-muted">by {{ r.ngo_name }}</small></h4>
+        <p><strong>Original Request:</strong> {{ r.original_name }}</p>
+        <p><strong>Recommended:</strong> {{ r.recommended_name }}</p>
+        <p><strong>Pharmacy:</strong> {{ r.pharmacy_name }} ({{ r.pharmacy_address }})</p>
+        <p><strong>Reason:</strong> {{ r.reason }}</p>
+        <div class="alert alert-warning" style="margin-top:1rem;padding:0.5rem;">
+            <small>Exchange requires physical pharmacist approval at the listed pharmacy.</small>
+        </div>
+        {% if r.status == 'pending' %}
+        <div style="margin-top:1rem;display:flex;gap:1rem;">
+            <form method="POST" action="{{ url_for('buyer.answer', recid=r.rec_id, action='accept') }}" style="margin:0;">
+                <button type="submit" class="btn btn-primary">Accept</button>
+            </form>
+            <form method="POST" action="{{ url_for('buyer.answer', recid=r.rec_id, action='reject') }}" style="margin:0;">
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </div>
+        {% else %}
+        <div style="margin-top:1rem;"><span class="badge badge-{{ r.status|lower }}">{{ r.status|capitalize }}</span></div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">No recommendations yet.</div>
+    {% endfor %}
+</div>
+{% endblock %}

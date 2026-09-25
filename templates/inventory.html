@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <h2>Search Medicines</h2>
+    <form class="card" method="GET" action="{{ url_for('common.search') }}">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <div class="form-group" style="flex:1;"><input type="text" name="q" placeholder="Medicine Name..." class="form-control" value="{{ q }}"></div>
+            <div class="form-group" style="flex:1;">
+                <select name="city" class="form-select">
+                    {% if free %}<option value="">All cities</option>{% endif %}
+                    {% for c in cities %}<option value="{{ c }}" {% if c == sel %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-group"><button type="submit" class="btn btn-primary">Search</button></div>
+        </div>
+    </form>
+    <div class="dashboard-grid">
+        {% for item in items %}
+        <div class="card">
+            <h4>{{ item.medicine_name }} <span class="badge badge-{{ (item.condition_status or 'sealed')|lower }}">{{ item.condition_status or 'sealed' }}</span></h4>
+            <p><strong>Qty:</strong> {{ item.quantity_available }}</p>
+            <p><strong>Expiry:</strong> <span class="expiry-{{ item.exp }}">{{ item.expiry_date }}</span></p>
+            <p><strong>Location:</strong> {{ item.locality or 'Main' }}, {{ item.city }}</p>
+            <p><strong>Donor:</strong> {{ item.seller_name or 'Verified Donor' }}</p>
+            <p><strong>NGO:</strong> {{ item.ngo_name }}</p>
+            {% if current_user.is_authenticated and current_user.role == 'buyer' %}
+                <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <a href="{{ url_for('buyer.ask', iid=item.inventory_id) }}" class="btn btn-sm btn-primary">Request</a>
+                    <form method="POST" action="{{ url_for('buyer.reach', did=item.donation_id) }}" style="margin:0;">
+                        <button type="submit" class="btn btn-sm btn-secondary">Contact Seller</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="empty-state"><i>🔍</i><p>No medicines found{% if sel %} in {{ sel }}{% endif %}.</p></div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

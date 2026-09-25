@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <h2>My Donations</h2>
+    <div class="card table-responsive">
+        <table>
+            <tr><th>Medicine</th><th>Qty</th><th>Expiry</th><th>Condition</th><th>Status</th><th>Date</th></tr>
+            {% for d in donations %}
+            <tr>
+                <td>{{ d.medicine_name }}<br><small class="text-muted">{{ d.category_name or '' }}</small></td>
+                <td>{{ d.quantity }}</td>
+                <td><span class="expiry-{{ d.exp }}">{{ d.expiry_date }}</span></td>
+                <td><span class="badge badge-{{ (d.condition_status or '')|lower }}">{{ d.condition_status or 'N/A' }}</span></td>
+                <td>
+                    <span class="badge badge-{{ d.status|lower }}">{{ d.status|capitalize }}</span>
+                    {% if d.rejection_reason %}<br><small class="text-danger">{{ d.rejection_reason }}</small>{% endif %}
+                </td>
+                <td>{{ d.created_at }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="empty-state">No donations yet.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

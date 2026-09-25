@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <h2>Contact Requests</h2>
+    <div class="card table-responsive">
+        <table>
+            <tr><th>Buyer</th><th>Medicine</th><th>Date</th><th>Status</th><th>Action</th></tr>
+            {% for r in requests %}
+            <tr>
+                <td>{{ r.buyer_name }}</td>
+                <td>{{ r.medicine_name }}</td>
+                <td>{{ r.requested_at }}</td>
+                <td><span class="badge badge-{{ r.status|lower }}">{{ r.status|capitalize }}</span></td>
+                <td>
+                    {% if r.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('seller.reply', cid=r.contact_request_id, action='approve') }}" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-primary">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('seller.reply', cid=r.contact_request_id, action='reject') }}" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" data-confirm="Reject request?">Reject</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="empty-state">No contact requests.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

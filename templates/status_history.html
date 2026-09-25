@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="max-width:700px;margin-top:2rem;">
+    <div class="card">
+        <h3>Status History</h3>
+        {% if history %}
+        <table>
+            <tr><th>Date</th><th>From</th><th>To</th><th>Changed By</th></tr>
+            {% for h in history %}
+            <tr>
+                <td>{{ h.changed_at }}</td>
+                <td><span class="badge">{{ h.old_status or '—' }}</span></td>
+                <td><span class="badge badge-approved">{{ h.new_status }}</span></td>
+                <td>{{ h.changed_by }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p class="empty-state">No status history recorded yet.</p>
+        {% endif %}
+        <div style="margin-top:1rem;"><a href="javascript:history.back()" class="btn btn-secondary">Back</a></div>
+    </div>
+</div>
+{% endblock %}

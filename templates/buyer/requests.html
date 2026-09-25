@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-wide" style="margin-top:2rem;">
+    <h2>My Requests</h2>
+    <div class="card table-responsive">
+        <table>
+            <tr><th>Medicine</th><th>Qty</th><th>Fetch Method</th><th>Status</th><th>Date</th><th>Contact Info</th><th></th></tr>
+            {% for r in requests %}
+            <tr>
+                <td>{{ r.medicine_name }}<br><small class="text-muted">{{ r.city }}</small></td>
+                <td>{{ r.quantity_requested }}</td>
+                <td>{{ r.fetch_method }}</td>
+                <td><span class="badge badge-{{ r.status|lower }}">{{ r.status|capitalize }}</span></td>
+                <td>{{ r.created_at }}</td>
+                <td>
+                    {% if r.status == 'approved' or r.status == 'completed' %}
+                        {% if r.fetch_method == 'direct' %}
+                            {% if r.contact %}
+                                Seller: {{ r.seller_name }} ({{ r.seller_phone }})
+                            {% else %}
+                                Send a contact request to the seller from the search page
+                            {% endif %}
+                        {% elif r.fetch_method == 'pharmacy' %}
+                            Pharmacy: {{ r.pharmacy_name }} ({{ r.pharmacy_phone }})<br><small>{{ r.pharmacy_address }}</small>
+                        {% elif r.fetch_method == 'ngo' %}
+                            NGO: {{ r.ngo_name }}
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if r.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('buyer.cancel', rid=r.request_id) }}" style="margin:0;">
+                        <button type="submit" class="btn btn-sm btn-danger" data-confirm="Cancel this request?">Cancel</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="empty-state">No requests made yet.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

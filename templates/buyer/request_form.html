@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="max-width:600px;margin-top:2rem;">
+    <div class="card">
+        <h2>Request Medicine</h2>
+        <div style="background:var(--bg);padding:1rem;border-radius:8px;margin-bottom:1.5rem;">
+            <h4>{{ item.medicine_name }}</h4>
+            <p>Condition: <span class="badge badge-{{ (item.condition_status or 'sealed')|lower }}">{{ item.condition_status or 'sealed' }}</span></p>
+            <p>Available: {{ item.quantity_available }} | Expiry: <span class="expiry-{{ item.exp }}">{{ item.expiry_date }}</span></p>
+            <p>Location: {{ item.locality or 'Main' }}, {{ item.city }}</p>
+            <p>Managing NGO: {{ item.ngo_name }}</p>
+        </div>
+        <form method="POST" action="{{ url_for('buyer.ask', iid=item.inventory_id) }}">
+            <div class="form-group">
+                <label class="form-label">Quantity Required</label>
+                <input type="number" name="quantity" min="1" max="{{ item.quantity_available }}" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Fetch Method</label>
+                <div class="fetch-method-selector">
+                    <label>
+                        <input type="radio" name="fetch_method" value="direct" style="display:none;" required>
+                        <div class="fetch-card">
+                            <h4>🚶 Direct from Seller</h4>
+                            <p class="text-muted" style="font-size:0.875rem;">Request seller contact directly</p>
+                        </div>
+                    </label>
+                    <label>
+                        <input type="radio" name="fetch_method" value="ngo" style="display:none;" required>
+                        <div class="fetch-card">
+                            <h4>🏥 Via NGO</h4>
+                            <p class="text-muted" style="font-size:0.875rem;">NGO coordinates pickup</p>
+                        </div>
+                    </label>
+                    <label>
+                        <input type="radio" name="fetch_method" value="pharmacy" style="display:none;" required>
+                        <div class="fetch-card">
+                            <h4>🏪 Via Pharmacy</h4>
+                            <p class="text-muted" style="font-size:0.875rem;">Exchange at a pharmacy in {{ item.city }}</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="form-group" id="pharmacy-selector" style="display:none;">
+                <label class="form-label">Select Pharmacy</label>
+                <select name="pharmacy_id" class="form-select">
+                    <option value="">-- Select --</option>
+                    {% for p in pharmacies %}
+                    <option value="{{ p.pharmacy_id }}">{{ p.name }} - {{ p.address }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Submit Request</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

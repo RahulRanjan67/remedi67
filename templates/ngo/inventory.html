@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="margin-top:2rem;">
+    <h2>Inventory</h2>
+    <div class="card table-responsive">
+        <table>
+            <tr><th>Medicine</th><th>Condition</th><th>Available Qty</th><th>Expiry</th><th>City</th></tr>
+            {% for item in inventory %}
+            <tr>
+                <td>{{ item.medicine_name }}</td>
+                <td><span class="badge badge-{{ (item.condition_status or '')|lower }}">{{ item.condition_status }}</span></td>
+                <td>{{ item.quantity_available }}</td>
+                <td><span class="expiry-{{ item.exp }}">{{ item.expiry_date }}</span></td>
+                <td>{{ item.city }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="empty-state">Inventory is empty.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

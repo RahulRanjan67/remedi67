@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-wide" style="margin-top:2rem;">
+    <h2>Manage Requests</h2>
+    {% if requests %}
+    <div class="card table-responsive">
+        <table>
+            <tr><th>Buyer</th><th>Medicine</th><th>Req Qty</th><th>Fetch Method</th><th>Status</th><th>Actions</th></tr>
+            {% for r in requests %}
+            <tr>
+                <td>{{ r.buyer_name }}</td>
+                <td>{{ r.medicine_name }} <span class="badge badge-{{ (r.condition_status or '')|lower }}">{{ r.condition_status or '' }}</span></td>
+                <td>{{ r.quantity_requested }}</td>
+                <td>{{ r.fetch_method }}{% if r.pharmacy_name %} ({{ r.pharmacy_name }}){% endif %}</td>
+                <td><span class="badge badge-{{ r.status|lower }}">{{ r.status|capitalize }}</span></td>
+                <td style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                    {% if r.status == 'pending' %}
+                    <form method="POST" action="{{ url_for('ngo.approve', rid=r.request_id) }}" style="margin:0;">
+                        <button class="btn btn-sm btn-primary">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('ngo.deny', rid=r.request_id) }}" style="margin:0;">
+                        <button class="btn btn-sm btn-danger" data-confirm="Reject this request?">Reject</button>
+                    </form>
+                    <a href="{{ url_for('ngo.suggest', rid=r.request_id) }}" class="btn btn-sm btn-secondary">Recommend Alt</a>
+                    {% elif r.status == 'approved' %}
+                    <form method="POST" action="{{ url_for('ngo.finish', rid=r.request_id) }}" style="margin:0;">
+                        <button class="btn btn-sm btn-info">Mark Complete</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+    <div class="card empty-state">No requests for your inventory.</div>
+    {% endif %}
+</div>
+{% endblock %}
