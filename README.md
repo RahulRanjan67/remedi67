@@ -1,106 +1,89 @@
-# ReMedi
+ReMedi
 
-<<<<<<< HEAD
-Medicine donation platform connecting sellers, NGOs, buyers and pharmacies, city by city.
+ReMedi is a medicine donation and access platform built around a simple idea: usable medicines should have a better path to people who need them instead of becoming unused stock.
 
-## Project layout
+This project started as a Flask learning experiment. While learning backend development, I wanted to put the basics into something real rather than isolated practice code. I built the routes, worked through the SQL queries, connected the database, handled forms and sessions, and gradually turned the idea into a working application. Around the same period, SIH work pushed me to move early toward FastAPI, but ReMedi remained the Flask experiment I had originally imagined while learning backend fundamentals.
 
-Everything in this folder is ReMedi's own code. Third-party packages are never installed
-here — see "Local setup" below for keeping them in a sibling folder outside this repo.
+I used AI assistance mainly for deployment, debugging, troubleshooting and fixing some flawed parts of the code. The project was still useful to me because I had to understand the routes, SQL, database relationships and application flow well enough to keep building and correcting it.
 
-```
-remedi/
-  app.py                Flask entrypoint (exposes `app`, what Vercel looks for)
-  config.py              Env/config loader
-  db.py                   MySQL connection + query helpers
-  util.py                 Shared helpers (city matching, expiry, roles)
-  models/                 One file per table/domain, plain functions
-  routes/                 One blueprint per file
-  templates/              Jinja2 templates
-  public/                 Static assets (css/js) — served from here on Vercel too
-  database/
-    schema.sql            Table definitions
-    sample.sql             Optional demo data (10 cities)
-  init_db.py               Run once to create tables (and optionally load sample data)
-  tests/test_logic.py       Pure-logic unit tests, no DB needed
-  requirements.txt
-  vercel.json
-  .env.example
-```
+What ReMedi does
 
-## Local setup
+ReMedi connects people who can give away unused medicines with people, NGOs and pharmacies that can help those medicines reach someone who needs them.
 
-Keep your virtual environment **outside** this folder, as a sibling directory, so the
-repo you push to GitHub never contains installed packages:
+A seller can donate available medicines, an NGO can verify and manage them, and a buyer can search inventory, request medicines and follow the request through its status changes. Pharmacies provide a practical hand-off point when direct collection is not suitable. The platform also supports urgent medicine needs, recommendations, contact requests, notifications and status history.
 
-```bash
-cd ..                              # one level above remedi/
-python -m venv remedi-venv         # lives next to remedi/, not inside it
-source remedi-venv/bin/activate    # Windows: remedi-venv\Scripts\activate
-cd remedi
-pip install -r requirements.txt
-cp .env.example .env               # fill in your local MySQL credentials
-python init_db.py --seed           # creates tables + loads sample data for all 10 cities
-python app.py                      # http://127.0.0.1:5000
-```
-=======
-Medicine donation platform connecting sellers, NGOs, buyers and pharmacies, city by city. Made using Flask at its core , this app seeks to solve the issue of leftover medicines going to waste while those in need stranded. This project was my experimentation using flask and many of codes have been completely manually written by me especially the routes etc.
->>>>>>> 5a99053c961840931d931a125222767de5151472
+The bigger purpose of the project is what interested me most: taking something as ordinary as an unused medicine and creating a system around it so that availability, verification, requests and delivery are not left to chance.
 
-Sample login (any account, password `remedi123`): `dev@remedi.in` (developer),
-`admin@remedi.in` (admin), `bhopal.seller1@remedi.in`, `bhopal.buyer1@remedi.in`,
-`ngo.seva@remedi.in` (Bhopal NGO), etc. — see `database/sample.sql` for the full list,
-one seller/buyer pair and one NGO per city.
+Roles
 
-<<<<<<< HEAD
-## Deploying to GitHub + Vercel
+Buyer — searches available medicines, sends requests, raises urgent needs and manages recommendations.
 
-1. Push this folder as a GitHub repo (the `.gitignore` already excludes `.env`,
-   `venv/`, and anything named `*-venv/` or `*-libs/`, so nothing outside the app
-   itself gets committed).
-2. In Vercel, import the repo. Vercel auto-detects Flask from `app.py` — no build
-   config needed (`vercel.json` here only raises the function timeout to 20s for
-   slower first-time DB connections).
-3. In the Vercel project's Environment Variables, set: `DB_HOST`, `DB_PORT`,
-   `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `SECRET_KEY` (a long random string — the
-   app refuses to boot on Vercel without one), and `DB_SSL_CA` if your MySQL
-   host requires a CA file (commit the `.pem` into the repo and point to its
-   relative path).
-4. Point `DB_HOST` at a MySQL host reachable from the public internet — Vercel's
-   functions can't reach `localhost`. Any managed MySQL works (PlanetScale,
-   Railway, Aiven, AWS RDS, etc.); most require SSL, hence `DB_SSL_CA`.
-5. Before or after the first deploy, run `init_db.py` against that same host from
-   your machine (point `.env` at it temporarily) to create the schema, e.g.
-   `python init_db.py --seed`.
-6. Deploy. Static files in `public/` are served by Vercel's CDN directly at
-   `/css/style.css` and `/js/script.js` — the same paths Flask serves locally,
-   so nothing else changes between environments.
+Seller — lists medicines for donation and tracks submitted donations and contact requests.
 
-Note: each request opens its own short-lived MySQL connection (`db.py`), which
-keeps the code simple but adds a little latency on a cold serverless function.
-For a class project this is fine; if it ever needs to scale, that's the first
-thing to revisit (e.g. a connection pool).
-=======
->>>>>>> 5a99053c961840931d931a125222767de5151472
+NGO — verifies donations, manages inventory, handles buyer requests and can recommend alternatives.
 
-## Geofencing rules
+Admin — manages users, approvals and the overall platform.
 
-- Buyers, sellers and admins see only the city they've selected (medicines in
-  search, the notice board, and pharmacies are all filtered by that city).
-- A seller's or buyer's own history (their donations, requests, contacts) is
-  never filtered by city — it's their own record regardless of where they
-  posted it from.
-- NGO and developer accounts are not restricted by any city: their dashboards,
-  search, and the NGO donation-verification queue show every city at once.
-<<<<<<< HEAD
+Developer — provides a separate system-level dashboard for development/administrative visibility.
 
-## Tests
+Pharmacy — acts as a registered medicine pickup/access point rather than a separate login role.
 
-```bash
-python -m unittest tests/test_logic.py -v
-```
+Tech used
 
-Covers the pure-logic helpers (city matching, expiry classification, donor
-tiers). It doesn't touch the database.
-=======
->>>>>>> 5a99053c961840931d931a125222767de5151472
+Python
+
+Flask — application framework and routing
+
+Flask-Login — authentication and session-based login
+
+MySQL — relational database
+
+mysql-connector-python — database connectivity
+
+Jinja2 — server-side HTML templates through Flask
+
+Werkzeug — password hashing and request/application utilities
+
+HTML, CSS, JavaScript — frontend and interaction
+
+Vercel — deployment
+
+The application intentionally keeps the backend straightforward: Flask routes call small model functions, model functions run SQL through shared database helpers, and Jinja2 renders the result.
+
+Database structure
+
+ReMedi uses a 13-table MySQL database built around users, medicines, donations and requests:
+
+users → accounts and roles
+ngo_profiles → NGO details
+pharmacies → registered pickup/access points
+medicine_categories → medicine classification
+medicines → medicine catalogue
+donations → medicines offered by sellers
+inventory → verified medicines available through NGOs
+requests → buyer requests against inventory
+medicine_recommendations → alternative medicine suggestions
+status_history → status changes over time
+notifications → user notifications
+contact_requests → buyer-seller contact workflow
+urgent_needs → urgent medicine requirements
+
+The database is the core of the application rather than just a place to store login data. Most features are built around relationships between these tables, foreign keys, status fields, filtering and SQL queries.
+
+GitHub updates after the first version
+
+Two additional updates were made after the initial GitHub version:
+
+Deployment + demo data: fixed environment variables not loading correctly on Vercel and replaced real-looking sample identities with safe demo data.
+
+Cleanup: fixed broken links and routes and cleaned up the CSS and HTML pages.
+
+What I learned
+
+ReMedi taught me more than just Flask syntax. I learned how routes, authentication, templates, SQL and database relationships actually come together in one application. I also got practical experience debugging problems that only appeared after deployment, working with environment variables, structuring a multi-role application and thinking about a feature from both the UI and database side.
+
+Most importantly, it changed how I look at backend development. Writing a route is easy; making many routes, roles, tables and workflows behave like one coherent system is where the real learning started.
+
+Current status
+
+ReMedi is a working prototype and is deployed on Vercel. One issue still remains: some pages are slower to load than I want, especially during the deployed experience. I have identified this as the next area I need to work on and improve.
