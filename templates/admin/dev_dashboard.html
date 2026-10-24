@@ -1,23 +1,70 @@
 {% extends 'base.html' %}
-{% block title %}Developer Dashboard{% endblock %}
+{% block title %}Developer Diagnostic Console{% endblock %}
 {% block content %}
-<div class="container" style="padding:2rem 1rem">
-<h2>Developer Dashboard</h2>
-<p style="color:var(--text-muted);margin-bottom:2rem">Database table statistics - live counts from MySQL across all cities.</p>
-<div class="dashboard-grid">
-{% for table, count in counts.items() %}
-<div class="card stat-card">
-<div class="icon">🗄️</div>
-<div class="num">{{ count }}</div>
-<div style="color:var(--text-muted);font-size:0.9rem">{{ table|replace('_',' ')|title }}</div>
-</div>
-{% endfor %}
-</div>
-<hr style="margin:2rem 0">
-<h3>Quick Admin Actions</h3>
-<div style="margin-top:1rem;display:flex;gap:1rem;flex-wrap:wrap">
-<a href="{{ url_for('admin.dash') }}" class="btn btn-secondary">Platform Stats</a>
-<a href="{{ url_for('admin.users') }}" class="btn btn-secondary">Manage Users</a>
-</div>
+<div class="container-wide" style="padding:2rem 1rem">
+    <div class="dev-console">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;border-bottom:1px solid #30363d;padding-bottom:1rem;">
+            <div>
+                <h2 style="margin:0;font-family:monospace;letter-spacing:-0.03em;">DEV_CONSOLE // SYSTEM RUNTIME &amp; DIAGNOSTICS</h2>
+                <p style="color:#8b949e;margin:0.25rem 0 0;font-size:0.9rem;">Internal state monitoring, connection pooling health, and operational dispatch.</p>
+            </div>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+                <span class="dev-badge">RUNTIME: {% if dbinfo.vercel %}VERCEL_SERVERLESS{% else %}LOCAL_WSGI{% endif %}</span>
+                <span class="dev-badge">POOL: {{ dbinfo.poolsize }}_CONNS</span>
+                <span class="dev-badge">SSL: {{ 'ENABLED' if dbinfo.ssl else 'OFF' }}</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+            <h4 style="color:#c9d1d9;margin-bottom:0.75rem;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;">Runtime Control &amp; Background Actions</h4>
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <form method="POST" action="{{ url_for('admin.devping') }}" style="margin:0;">
+                    <button type="submit" class="btn btn-sm btn-secondary" style="background:#21262d;color:#58a6ff;border:1px solid #30363d;">[>] Run DB Ping Test</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.devrefresh') }}" style="margin:0;">
+                    <button type="submit" class="btn btn-sm btn-secondary" style="background:#21262d;color:#58a6ff;border:1px solid #30363d;">[>] Trigger Urgent Matching Refresh</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.devclear') }}" style="margin:0;">
+                    <button type="submit" class="btn btn-sm btn-secondary" style="background:#21262d;color:#58a6ff;border:1px solid #30363d;">[>] Flush Notification TTL Cache</button>
+                </form>
+                <a href="{{ url_for('admin.dash') }}" class="btn btn-sm btn-secondary" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;">Governance Portal</a>
+                <a href="{{ url_for('admin.auditlog') }}" class="btn btn-sm btn-secondary" style="background:#21262d;color:#c9d1d9;border:1px solid #30363d;">Audit Log</a>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:2rem;">
+            <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:1rem;">
+                <div style="font-size:0.8rem;color:#8b949e;text-transform:uppercase;font-family:monospace;">Database Target</div>
+                <div style="font-size:1.1rem;color:#58a6ff;font-family:monospace;margin-top:0.25rem;">{{ dbinfo.name }} @ {{ dbinfo.host }}:{{ dbinfo.port }}</div>
+                <div style="font-size:0.8rem;color:#8b949e;margin-top:0.5rem;">User: <span style="color:#c9d1d9;">{{ dbinfo.user }}</span> | Pooling: <span style="color:#3fb950;">Active</span></div>
+            </div>
+            <div style="background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:1rem;">
+                <div style="font-size:0.8rem;color:#8b949e;text-transform:uppercase;font-family:monospace;">Total Entity Rows</div>
+                <div style="font-size:1.1rem;color:#3fb950;font-family:monospace;margin-top:0.25rem;">
+                    {{ counts.values()|sum }} records across {{ counts|length }} tables
+                </div>
+                <div style="font-size:0.8rem;color:#8b949e;margin-top:0.5rem;">Schema Engine: <span style="color:#c9d1d9;">InnoDB / UTF8MB4</span></div>
+            </div>
+        </div>
+
+        <h3 style="font-size:1rem;color:#c9d1d9;margin-bottom:1rem;font-family:monospace;">LIVE TABLE RECORD COUNTS</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;margin-bottom:2rem;">
+            {% for table, count in counts.items() %}
+            <div style="background:#0d1117;border:1px solid #21262d;border-radius:6px;padding:0.75rem;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-family:monospace;font-size:0.85rem;color:#8b949e;">{{ table }}</span>
+                <span style="font-family:monospace;font-weight:bold;color:#f0f6fc;background:#21262d;padding:0.15rem 0.45rem;border-radius:4px;font-size:0.85rem;">{{ count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h3 style="font-size:1rem;color:#c9d1d9;margin-bottom:1rem;font-family:monospace;">LIVE STATUS EVENT STREAM (LAST 25 EVENTS)</h3>
+        <div class="dev-terminal">
+            {% for r in recent %}
+[{{ r.changed_at }}] ENTITY={{ r.entity_type }}#{{ r.entity_id }} OLD={{ r.old_status or 'NULL' }} NEW={{ r.new_status }} BY_UID={{ r.changed_by or 'SYS' }} ({{ r.actor or 'System' }})
+            {% else %}
+[SYS] No status transitions recorded.
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

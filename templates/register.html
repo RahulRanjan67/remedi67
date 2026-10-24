@@ -1,64 +1,65 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container" style="max-width:600px;margin-top:4rem;margin-bottom:4rem;">
+<div class="container" style="max-width:600px;margin-top:3rem;margin-bottom:4rem;">
     <div class="card">
-        <h2 style="text-align:center;margin-bottom:2rem;">Register</h2>
+        <h2 style="text-align:center;margin-bottom:1.5rem;">Create Account</h2>
         <form method="POST" action="{{ url_for('auth.register') }}">
             <div class="form-group">
-                <label class="form-label">Name</label>
-                <input type="text" name="name" class="form-control" required>
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-control" required autocomplete="name">
             </div>
             <div class="form-group">
                 <label class="form-label">Email</label>
-                <input type="email" name="email" class="form-control" required>
+                <input type="email" name="email" class="form-control" required autocomplete="email">
             </div>
             <div class="form-group">
                 <label class="form-label">Password</label>
-                <input type="password" name="password" id="password" class="form-control" required>
+                <input type="password" name="password" id="password" class="form-control" required autocomplete="new-password">
             </div>
             <div class="form-group">
                 <label class="form-label">Confirm Password</label>
-                <input type="password" name="confirm_password" id="confirm_password" class="form-control" required>
+                <input type="password" name="confirm_password" id="confirm_password" class="form-control" required autocomplete="new-password">
             </div>
             <div class="form-group">
-                <label class="form-label">Role</label>
-                <div>
-                    <label><input type="radio" name="role" value="buyer" checked> Buyer</label>
-                    <label style="margin-left:1rem;"><input type="radio" name="role" value="seller"> Seller</label>
-                    <label style="margin-left:1rem;"><input type="radio" name="role" value="ngo"> NGO</label>
+                <label class="form-label">Account Role</label>
+                <div style="display:flex;gap:1.5rem;align-items:center;padding:0.25rem 0;">
+                    <label><input type="radio" name="role" value="user" checked> User (Donate &amp; Request)</label>
+                    <label><input type="radio" name="role" value="ngo"> NGO Partner</label>
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Phone</label>
-                <input type="text" name="phone" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">City</label>
+                <label class="form-label">Home City</label>
                 <select name="city" class="form-select" required>
-                    <option value="">Select city</option>
-                    {% for c in cities %}<option value="{{ c }}" {% if c == city %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                    <option value="">Select your city</option>
+                    {% for c in cities %}
+                    <option value="{{ c }}" {% if c == city %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Pincode</label>
-                <input type="text" name="pincode" class="form-control" required>
+                <label class="form-label">Phone <small class="text-muted">(Optional)</small></label>
+                <input type="text" name="phone" class="form-control" placeholder="Contact number" autocomplete="tel">
             </div>
             <div class="form-group">
-                <label class="form-label">Locality</label>
-                <input type="text" name="locality" class="form-control" required>
+                <label class="form-label">Pincode <small class="text-muted">(Optional)</small></label>
+                <input type="text" name="pincode" class="form-control" placeholder="Postal code">
             </div>
-            <div id="ngo-fields" style="display:none;background:var(--bg);padding:1rem;border-radius:8px;margin-bottom:1rem;">
-                <p class="text-muted" style="font-size:0.875rem;margin-bottom:1rem;">NGO accounts require admin approval before login.</p>
+            <div class="form-group">
+                <label class="form-label">Locality / Neighborhood <small class="text-muted">(Optional)</small></label>
+                <input type="text" name="locality" class="form-control" placeholder="Area or ward name">
+            </div>
+            <div id="ngo-fields" style="display:none;background:var(--bg);padding:1rem;border-radius:8px;margin-bottom:1rem;border:1px solid var(--border);">
+                <p class="text-muted" style="font-size:0.875rem;margin-bottom:1rem;">NGO accounts require verification by a platform administrator before activation.</p>
                 <div class="form-group">
-                    <label class="form-label">NGO Name</label>
-                    <input type="text" name="ngo_name" class="form-control">
+                    <label class="form-label">Organization Name</label>
+                    <input type="text" name="ngo_name" class="form-control" placeholder="Official registered NGO name">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Registration Number</label>
-                    <input type="text" name="registration_number" class="form-control">
+                    <label class="form-label">Registration / Tax Number</label>
+                    <input type="text" name="registration_number" class="form-control" placeholder="e.g. NGO-REG-XXXX">
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;">Register</button>
+            <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;">Register</button>
         </form>
     </div>
 </div>

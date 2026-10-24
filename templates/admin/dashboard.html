@@ -1,54 +1,94 @@
 {% extends 'base.html' %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Governance Portal{% endblock %}
 {% block content %}
 <div class="container" style="padding:2rem 1rem">
-<h2>Admin Dashboard</h2>
-<p style="color:var(--text-muted);margin-bottom:1.5rem">Statistics and NGO approvals for <span class="cityname">{{ label }}</span>.</p>
-<div class="dashboard-grid">
-<div class="card stat-card"><div class="num">{{ stats.total }}</div><div>Total Users</div></div>
-<div class="card stat-card"><div class="num">{{ stats.sellers }}</div><div>Sellers</div></div>
-<div class="card stat-card"><div class="num">{{ stats.buyers }}</div><div>Buyers</div></div>
-<div class="card stat-card"><div class="num">{{ stats.ngos }}</div><div>NGOs</div></div>
-<div class="card stat-card"><div class="num" style="color:var(--warning)">{{ stats.pending }}</div><div>Pending NGOs</div></div>
-<div class="card stat-card"><div class="num">{{ stats.donations }}</div><div>Total Donations</div></div>
-<div class="card stat-card"><div class="num" style="color:var(--success)">{{ stats.verified }}</div><div>Verified Donations</div></div>
-<div class="card stat-card"><div class="num" style="color:var(--warning)">{{ stats.waiting }}</div><div>Pending Donations</div></div>
-<div class="card stat-card"><div class="num">{{ stats.stock }}</div><div>Inventory Items</div></div>
-<div class="card stat-card"><div class="num" style="color:var(--info)">{{ stats.requests }}</div><div>Pending Requests</div></div>
-<div class="card stat-card"><div class="num" style="color:var(--danger)">{{ stats.needs }}</div><div>Open Urgent Needs</div></div>
-</div>
-<div class="card">
-<h3>Pending NGO Approvals</h3>
-{% if pending %}
-<div class="table-responsive">
-<table>
-<thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>City</th><th>Action</th></tr></thead>
-<tbody>
-{% for n in pending %}
-<tr>
-<td>{{ n.name }}</td>
-<td>{{ n.email }}</td>
-<td>{{ n.phone or '--' }}</td>
-<td>{{ n.city or '--' }}</td>
-<td>
-<form method="POST" action="{{ url_for('admin.approve', uid=n.user_id) }}" style="display:inline">
-<button class="btn btn-primary btn-sm" type="submit">Approve</button>
-</form>
-</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
-{% else %}
-<div class="empty-state"><p>No pending NGO approvals.</p></div>
-{% endif %}
-</div>
-<div style="margin-top:1rem">
-<a href="{{ url_for('admin.users') }}" class="btn btn-secondary">View All Users</a>
-{% if current_user.role == 'developer' %}
-<a href="{{ url_for('admin.devdash') }}" class="btn btn-secondary" style="margin-left:0.5rem">Dev Stats</a>
-{% endif %}
-</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+            <h2>Platform Governance &amp; Audit Portal</h2>
+            <p class="text-muted">Regulatory oversight, safety compliance, and accreditation for <strong>{{ label }}</strong>.</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+            <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">User Registry</a>
+            <a href="{{ url_for('admin.auditlog') }}" class="btn btn-primary">Audit Log</a>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card stat-card"><span class="stat-pill">citizens</span><div class="num">{{ stats.users or stats.total }}</div><div>Registered Users</div></div>
+        <div class="card stat-card"><span class="stat-pill">partners</span><div class="num">{{ stats.ngos }}</div><div>Accredited NGOs</div></div>
+        <div class="card stat-card"><span class="stat-pill">compliance</span><div class="num" style="color:var(--success)">{{ stats.verified }}</div><div>Verified Inflow</div></div>
+        <div class="card stat-card"><span class="stat-pill">queue</span><div class="num" style="color:var(--warning)">{{ stats.waiting }}</div><div>Pending Inspection</div></div>
+        <div class="card stat-card"><span class="stat-pill">dispensary</span><div class="num" style="color:var(--info)">{{ stats.pharms }}</div><div>Partner Pharmacies</div></div>
+        <div class="card stat-card"><span class="stat-pill">shortages</span><div class="num" style="color:var(--danger)">{{ stats.needs }}</div><div>Open Urgent Needs</div></div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+        <h3>Pending NGO Accreditation Requests</h3>
+        {% if pending %}
+        <div class="table-responsive" style="margin-top:1rem;">
+            <table>
+                <thead><tr><th>Organization Name</th><th>Contact Email</th><th>Phone</th><th>City</th><th>Action</th></tr></thead>
+                <tbody>
+                {% for n in pending %}
+                <tr>
+                    <td><strong>{{ n.name }}</strong></td>
+                    <td>{{ n.email }}</td>
+                    <td>{{ n.phone or '--' }}</td>
+                    <td>{{ n.city or '--' }}</td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.approve', uid=n.user_id) }}" style="display:inline">
+                            <button class="btn btn-primary btn-sm" type="submit">Approve Accreditation</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:1.5rem;"><p>No pending NGO accreditation requests at this time.</p></div>
+        {% endif %}
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+        <h3>City Distribution &amp; Quality Metrics</h3>
+        <p class="text-muted" style="font-size:0.9rem;margin-bottom:1rem;">Aggregate summary across operational regions:</p>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>City Region</th><th>Total Donations</th><th>Verified Safe</th><th>Rejected / Quarantined</th><th>Active Inventory</th></tr></thead>
+                <tbody>
+                {% for cr in cityrows %}
+                <tr>
+                    <td><strong>{{ cr.city }}</strong></td>
+                    <td>{{ cr.dons or 0 }}</td>
+                    <td><span style="color:var(--success);font-weight:600;">{{ cr.ver or 0 }}</span></td>
+                    <td><span style="color:var(--danger);font-weight:600;">{{ cr.rej or 0 }}</span></td>
+                    <td>{{ cr.invs or 0 }} items</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+        <h3>Recent Audit Trail Records</h3>
+        <div class="table-responsive" style="margin-top:1rem;">
+            <table>
+                <thead><tr><th>Entity</th><th>ID</th><th>Transition</th><th>Authorized By</th><th>Timestamp</th></tr></thead>
+                <tbody>
+                {% for a in audits %}
+                <tr>
+                    <td><span class="badge badge-info">{{ a.entity_type }}</span></td>
+                    <td>#{{ a.entity_id }}</td>
+                    <td>{{ a.old_status or 'new' }} &rarr; <strong>{{ a.new_status }}</strong></td>
+                    <td>{{ a.actor or 'System' }} (UID: {{ a.changed_by or '--' }})</td>
+                    <td><small class="text-muted">{{ a.changed_at }}</small></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 {% endblock %}

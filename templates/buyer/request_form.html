@@ -8,7 +8,8 @@
             <p>Condition: <span class="badge badge-{{ (item.condition_status or 'sealed')|lower }}">{{ item.condition_status or 'sealed' }}</span></p>
             <p>Available: {{ item.quantity_available }} | Expiry: <span class="expiry-{{ item.exp }}">{{ item.expiry_date }}</span></p>
             <p>Location: {{ item.locality or 'Main' }}, {{ item.city }}</p>
-            <p>Managing NGO: {{ item.ngo_name }}</p>
+            <p>Managing NGO: {{ item.ngo_name or 'None (Direct Seller Listing)' }}</p>
+            {% if item.batch_number %}<p>Batch: {{ item.batch_number }} {% if item.ngo_id %}<span class="badge badge-verified">Recommended Batch</span>{% endif %}</p>{% endif %}
         </div>
         <form method="POST" action="{{ url_for('buyer.ask', iid=item.inventory_id) }}">
             <div class="form-group">
@@ -16,35 +17,35 @@
                 <input type="number" name="quantity" min="1" max="{{ item.quantity_available }}" class="form-control" required>
             </div>
             <div class="form-group">
-                <label class="form-label">Fetch Method</label>
+                <label class="form-label">Pickup / Fulfillment Method</label>
                 <div class="fetch-method-selector">
                     <label>
                         <input type="radio" name="fetch_method" value="direct" style="display:none;" required>
                         <div class="fetch-card">
-                            <h4>🚶 Direct from Seller</h4>
-                            <p class="text-muted" style="font-size:0.875rem;">Request seller contact directly</p>
+                            <h4>Direct Exchange</h4>
+                            <p class="text-muted" style="font-size:0.875rem;">Coordinate directly with donor</p>
                         </div>
                     </label>
                     <label>
                         <input type="radio" name="fetch_method" value="ngo" style="display:none;" required>
                         <div class="fetch-card">
-                            <h4>🏥 Via NGO</h4>
-                            <p class="text-muted" style="font-size:0.875rem;">NGO coordinates pickup</p>
+                            <h4>Via NGO Office</h4>
+                            <p class="text-muted" style="font-size:0.875rem;">NGO coordinates safe pickup</p>
                         </div>
                     </label>
                     <label>
                         <input type="radio" name="fetch_method" value="pharmacy" style="display:none;" required>
                         <div class="fetch-card">
-                            <h4>🏪 Via Pharmacy</h4>
-                            <p class="text-muted" style="font-size:0.875rem;">Exchange at a pharmacy in {{ item.city }}</p>
+                            <h4>Via Pharmacy</h4>
+                            <p class="text-muted" style="font-size:0.875rem;">Drop-off at accredited partner in {{ item.city }}</p>
                         </div>
                     </label>
                 </div>
             </div>
             <div class="form-group" id="pharmacy-selector" style="display:none;">
-                <label class="form-label">Select Pharmacy</label>
+                <label class="form-label">Select Designated Pharmacy</label>
                 <select name="pharmacy_id" class="form-select">
-                    <option value="">-- Select --</option>
+                    <option value="">-- Choose partner pharmacy --</option>
                     {% for p in pharmacies %}
                     <option value="{{ p.pharmacy_id }}">{{ p.name }} - {{ p.address }}</option>
                     {% endfor %}

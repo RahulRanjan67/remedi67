@@ -76,6 +76,16 @@ def approve(rid):
     except ValueError as e:
         flash(str(e),"danger")
     return redirect(url_for("ngo.manage"))
+@bp.route("/requests/<int:rid>/ready",methods=["POST"])
+@login_required
+@needrole("ngo")
+def markready(rid):
+    try:
+        req.ready(rid,current_user.user_id)
+        flash("Request marked ready for pickup.","success")
+    except ValueError as e:
+        flash(str(e),"danger")
+    return redirect(url_for("ngo.manage"))
 @bp.route("/requests/<int:rid>/reject",methods=["POST"])
 @login_required
 @needrole("ngo")

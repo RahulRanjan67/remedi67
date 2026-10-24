@@ -1,12 +1,14 @@
 from db import query
+from util import toint
 from models import notif,pharm
 def create(rid,ngoid,medid,pid,reason):
+    pid=toint(pid) if pid else None
     r=query("SELECT i.city,i.ngo_id,i.medicine_id,r.buyer_id FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id WHERE r.request_id=%s",(rid,),one=True)
-    if(not r or r["ngo_id"]!=ngoid):
+    if not r or (r["ngo_id"] and r["ngo_id"]!=ngoid):
         raise ValueError("This request is not managed by your NGO")
-    if(not query("SELECT medicine_id FROM medicines WHERE medicine_id=%s",(medid,),one=True)):
+    if not query("SELECT medicine_id FROM medicines WHERE medicine_id=%s",(medid,),one=True):
         raise ValueError("Unknown medicine")
-    if(pharm.cityof(pid)!=r["city"]):
+    if not pid or pharm.cityof(pid)!=r["city"]:
         raise ValueError("The pharmacy must be in the request city")
     recid=query("INSERT INTO medicine_recommendations (request_id,ngo_id,original_medicine_id,recommended_medicine_id,pharmacy_id,reason) VALUES (%s,%s,%s,%s,%s,%s)",(rid,ngoid,r["medicine_id"],medid,pid,reason),commit=True)
     notif.add(r["buyer_id"],f"An NGO has recommended an alternative medicine for your request #{rid}.")
@@ -16,7 +18,7 @@ def bybuyer(bid,city=None):
 def answer(recid,bid,action):
     status="accepted" if action=="accept" else "rejected"
     row=query("SELECT mr.ngo_id,mr.request_id FROM medicine_recommendations mr JOIN requests r ON mr.request_id=r.request_id WHERE mr.rec_id=%s AND r.buyer_id=%s AND mr.status='pending'",(recid,bid),one=True)
-    if(not row):
+    if not row:
         raise ValueError("Recommendation not found")
     query("UPDATE medicine_recommendations SET status=%s WHERE rec_id=%s",(status,recid),commit=True)
     notif.add(row["ngo_id"],f"Buyer has {status} your medicine recommendation for request #{row['request_id']}.")

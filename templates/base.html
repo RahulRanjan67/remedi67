@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}ReMedi{% endblock %} — ReMedi</title>
+    <title>{% block title %}ReMedi{% endblock %} - ReMedi</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <nav class="navbar">
-        <a href="{{ url_for('common.index') }}" class="nav-brand">⚕ ReMedi</a>
-        <button class="hamburger" id="hamburger">☰</button>
+        <a href="{{ url_for('common.index') }}" class="nav-brand">ReMedi</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+            <span class="burger-bar"></span>
+        </button>
         <div class="nav-links" id="nav-links">
             {% if free %}
-            <span class="cityname" style="margin:0 0.5rem;">🌐 All cities</span>
+            <span class="cityname" style="margin:0 0.5rem;">All cities</span>
             {% else %}
             <form method="POST" action="{{ url_for('common.pick') }}" style="display:flex;align-items:center;gap:0.35rem;margin:0 0.5rem;">
                 <label for="city-selector" class="sr-only">Active city</label>
-                <select id="city-selector" name="city" class="form-select" onchange="this.form.submit()" style="width:auto;min-width:120px;padding:0.35rem 2rem 0.35rem 0.65rem;">
+                <select id="city-selector" name="city" class="form-select" onchange="this.form.submit()" style="width:auto;min-width:120px;padding:0.35rem 1.8rem 0.35rem 0.65rem;">
                     {% for c in cities %}
                     <option value="{{ c }}" {% if c == city %}selected{% endif %}>{{ c }}</option>
                     {% endfor %}
@@ -30,35 +35,55 @@
                 <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
                 <a href="{{ url_for('auth.register') }}" class="nav-link btn btn-primary" style="color:white">Register</a>
             {% else %}
-                {% if current_user.role == 'seller' %}
+                {% if current_user.role == 'user' %}
+                    <a href="{{ url_for('buyer.dash') }}" class="nav-link">Dashboard</a>
+                    <a href="{{ url_for('common.search') }}" class="nav-link">Search</a>
+                    <a href="{{ url_for('seller.donate') }}" class="nav-link">Donate</a>
+                    <a href="{{ url_for('seller.mine') }}" class="nav-link">My Donations</a>
+                    <a href="{{ url_for('buyer.reqs') }}" class="nav-link">My Requests</a>
+                    <a href="{{ url_for('buyer.needs') }}" class="nav-link">Urgent Needs</a>
+                    <a href="{{ url_for('common.board') }}" class="nav-link">Notice Board</a>
+                    <a href="{{ url_for('common.pharms') }}" class="nav-link">Pharmacies</a>
+                    <a href="{{ url_for('buyer.contacts') }}" class="nav-link">Contacts</a>
+                {% elif current_user.role == 'ngo' %}
+                    <a href="{{ url_for('ngo.dash') }}" class="nav-link">Dashboard</a>
+                    <a href="{{ url_for('common.search') }}" class="nav-link">Search & Buy</a>
+                    <a href="{{ url_for('ngo.verify') }}" class="nav-link">Verify Donations</a>
+                    <a href="{{ url_for('ngo.manage') }}" class="nav-link">Manage Requests</a>
+                    <a href="{{ url_for('ngo.stock') }}" class="nav-link">Inventory</a>
+                    <a href="{{ url_for('buyer.reqs') }}" class="nav-link">My Procurements</a>
+                    <a href="{{ url_for('buyer.contacts') }}" class="nav-link">Seller Contacts</a>
+                    <a href="{{ url_for('common.pharms') }}" class="nav-link">Pharmacies</a>
+                    <a href="{{ url_for('common.board') }}" class="nav-link">Notice Board</a>
+                {% elif current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dash') }}" class="nav-link">Governance Portal</a>
+                    <a href="{{ url_for('admin.users') }}" class="nav-link">User Directory</a>
+                    <a href="{{ url_for('admin.auditlog') }}" class="nav-link">Audit Log</a>
+                    <a href="{{ url_for('common.pharms') }}" class="nav-link">Pharmacies</a>
+                    <a href="{{ url_for('common.board') }}" class="nav-link">Notice Board</a>
+                {% elif current_user.role == 'developer' %}
+                    <a href="{{ url_for('admin.devdash') }}" class="nav-link" style="color:var(--accent);font-weight:bold;">Dev Console</a>
+                    <a href="{{ url_for('admin.dash') }}" class="nav-link">Governance</a>
+                    <a href="{{ url_for('admin.users') }}" class="nav-link">Users</a>
+                    <a href="{{ url_for('admin.auditlog') }}" class="nav-link">Audit Log</a>
+                    <a href="{{ url_for('common.search') }}" class="nav-link">Search</a>
+                {% elif current_user.role == 'seller' %}
                     <a href="{{ url_for('seller.dash') }}" class="nav-link">Dashboard</a>
                     <a href="{{ url_for('seller.donate') }}" class="nav-link">Donate</a>
                     <a href="{{ url_for('seller.mine') }}" class="nav-link">My Donations</a>
-                    <a href="{{ url_for('seller.contacts') }}" class="nav-link">Contact Requests</a>
+                    <a href="{{ url_for('seller.contacts') }}" class="nav-link">Contacts</a>
+                    <a href="{{ url_for('common.board') }}" class="nav-link">Notice Board</a>
                 {% elif current_user.role == 'buyer' %}
                     <a href="{{ url_for('buyer.dash') }}" class="nav-link">Dashboard</a>
                     <a href="{{ url_for('common.search') }}" class="nav-link">Search</a>
                     <a href="{{ url_for('buyer.reqs') }}" class="nav-link">My Requests</a>
+                    <a href="{{ url_for('buyer.needs') }}" class="nav-link">Urgent Needs</a>
                     <a href="{{ url_for('common.board') }}" class="nav-link">Notice Board</a>
-                    <a href="{{ url_for('buyer.recs') }}" class="nav-link">Recommendations</a>
                     <a href="{{ url_for('buyer.contacts') }}" class="nav-link">Contacts</a>
-                {% elif current_user.role == 'ngo' %}
-                    <a href="{{ url_for('ngo.dash') }}" class="nav-link">Dashboard</a>
-                    <a href="{{ url_for('ngo.verify') }}" class="nav-link">Verify Donations</a>
-                    <a href="{{ url_for('ngo.manage') }}" class="nav-link">Manage Requests</a>
-                    <a href="{{ url_for('ngo.stock') }}" class="nav-link">Inventory</a>
-                    <a href="{{ url_for('common.search') }}" class="nav-link">Search</a>
-                {% elif current_user.role == 'admin' %}
-                    <a href="{{ url_for('admin.dash') }}" class="nav-link">Dashboard</a>
-                    <a href="{{ url_for('admin.users') }}" class="nav-link">Users</a>
-                {% elif current_user.role == 'developer' %}
-                    <a href="{{ url_for('admin.devdash') }}" class="nav-link">Dev Dashboard</a>
-                    <a href="{{ url_for('admin.dash') }}" class="nav-link">Admin</a>
-                    <a href="{{ url_for('admin.users') }}" class="nav-link">Users</a>
                 {% endif %}
                 <a href="{{ url_for('common.notifs') }}" class="nav-link" style="position:relative">Notifications {% if unread %}<span class="notif-badge">{{ unread }}</span>{% endif %}</a>
                 <a href="{{ url_for('common.profile') }}" class="nav-link">Profile</a>
-                <a href="{{ url_for('auth.logout') }}" class="nav-link btn btn-secondary">Logout</a>
+                <a href="{{ url_for('auth.logout') }}" class="nav-link btn btn-secondary btn-sm">Logout</a>
             {% endif %}
         </div>
     </nav>
@@ -67,7 +92,7 @@
             {% for category, message in messages %}
                 <div class="alert alert-{{ category }}">
                     {{ message }}
-                    <span class="alert-close">×</span>
+                    <span class="alert-close">x</span>
                 </div>
             {% endfor %}
         {% endwith %}
@@ -75,7 +100,7 @@
     {% block content %}{% endblock %}
     <footer class="footer">
         <div class="container">
-            <p>ReMedi · Medicine Circular Economy Platform</p>
+            <p>ReMedi - Medicine Circular Economy Platform</p>
             <p style="font-size: 0.8rem; opacity: 0.7;">Disclaimer: ReMedi facilitates donation workflows only and does not provide medical advice.</p>
         </div>
     </footer>

@@ -8,12 +8,12 @@
         <table>
             <tr>
                 <th><input type="checkbox" id="select-all" title="Select all"></th>
-                <th>Seller</th><th>Medicine</th><th>Qty</th><th>Condition</th><th>Expiry</th><th>Batch</th><th>Correct Medicine</th><th>Action</th>
+                <th>Seller Location</th><th>Medicine</th><th>Qty</th><th>Condition</th><th>Expiry</th><th>Batch</th><th>Correct Medicine</th><th>Action</th>
             </tr>
             {% for d in donations %}
             <tr>
                 <td><input type="checkbox" name="donation_ids" value="{{ d.donation_id }}" class="row-cb"></td>
-                <td>{{ d.seller_name }}</td>
+                <td>{{ d.locality or 'Central' }}, {{ d.city }}</td>
                 <td>{{ d.medicine_name }}<br><small class="text-muted">{{ d.category_name or '' }}</small></td>
                 <td>{{ d.quantity }}</td>
                 <td><span class="badge badge-{{ (d.condition_status or '')|lower }}">{{ d.condition_status or 'N/A' }}</span></td>

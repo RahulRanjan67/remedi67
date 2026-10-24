@@ -1,5 +1,5 @@
-import os
-from flask import Flask,render_template
+import os,time
+from flask import Flask,render_template,session
 from flask_login import LoginManager,current_user
 import config
 from models import user,notif
@@ -17,7 +17,16 @@ def loaduser(uid):
     return user.account(data) if data else None
 @app.context_processor
 def ctx():
-    unread=notif.unread(current_user.user_id) if current_user.is_authenticated else 0
+    unread=0
+    if current_user.is_authenticated:
+        now=time.time()
+        last=session.get("unread_ts",0)
+        if now-last>30:
+            unread=notif.unread(current_user.user_id)
+            session["unread"]=unread
+            session["unread_ts"]=now
+        else:
+            unread=session.get("unread",0)
     return {"cities":config.cities,"city":getcity(),"free":free(),"unread":unread}
 app.register_blueprint(auth.bp)
 app.register_blueprint(common.bp)
@@ -34,5 +43,5 @@ def e404(err):
 @app.errorhandler(500)
 def e500(err):
     return render_template("errors/500.html"),500
-if(__name__=="__main__"):
+if __name__=="__main__":
     app.run(debug=os.environ.get("FLASK_DEBUG","1")=="1",host="127.0.0.1",port=5000)

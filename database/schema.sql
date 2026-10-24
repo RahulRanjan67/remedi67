@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(100) NOT NULL,
   email VARCHAR(150) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  role ENUM('developer','admin','ngo','seller','buyer') NOT NULL,
+  role ENUM('developer','admin','ngo','user','seller','buyer') NOT NULL,
   phone VARCHAR(20),
   city VARCHAR(100),
   pincode VARCHAR(10),
@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS donations (
   FOREIGN KEY (seller_id) REFERENCES users(user_id),
   FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id),
   FOREIGN KEY (ngo_id) REFERENCES users(user_id),
-  INDEX idxcity (city,status)
+  INDEX idxcity (city,status),
+  INDEX idxseller (seller_id,status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS inventory (
   inventory_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -70,7 +71,7 @@ CREATE TABLE IF NOT EXISTS inventory (
   city VARCHAR(100) NOT NULL,
   locality VARCHAR(200),
   condition_status ENUM('sealed','opened','partial') DEFAULT 'sealed',
-  ngo_id INT NOT NULL,
+  ngo_id INT DEFAULT NULL,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (donation_id) REFERENCES donations(donation_id),
   FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id),
@@ -84,7 +85,7 @@ CREATE TABLE IF NOT EXISTS requests (
   quantity_requested INT NOT NULL,
   fetch_method ENUM('direct','ngo','pharmacy') DEFAULT 'ngo',
   pharmacy_id INT,
-  status ENUM('pending','approved','rejected','completed') DEFAULT 'pending',
+  status ENUM('pending','approved','rejected','completed','cancelled','ready') DEFAULT 'pending',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (buyer_id) REFERENCES users(user_id),
   FOREIGN KEY (inventory_id) REFERENCES inventory(inventory_id),
@@ -114,7 +115,8 @@ CREATE TABLE IF NOT EXISTS status_history (
   new_status VARCHAR(50) NOT NULL,
   changed_by INT,
   changed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  INDEX idxent (entity_type,entity_id)
+  INDEX idxent (entity_type,entity_id),
+  INDEX idxtime (changed_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS notifications (
   notification_id INT AUTO_INCREMENT PRIMARY KEY,

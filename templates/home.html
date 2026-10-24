@@ -3,44 +3,60 @@
 <div class="hero">
     <div class="container">
         <h1>Give Unused Medicines a Second Life</h1>
-        <p>Connecting donors, NGOs, and people who need medicines safely and locally.</p>
-        <div style="display:flex;gap:1rem;justify-content:center;">
+        <p>Connecting donors, certified NGOs, and people in need safely and locally.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
             <a href="{{ url_for('common.search') }}" class="btn btn-secondary" style="background:white;color:var(--primary);border:none;">Find Medicines</a>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="border:1px solid white;">Donate Medicine</a>
+            {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="border:1px solid white;">Donate Medicine</a>
+            {% elif current_user.role in ('user', 'seller') %}
+                <a href="{{ url_for('seller.donate') }}" class="btn btn-primary" style="border:1px solid white;">Donate Medicine</a>
+            {% elif current_user.role == 'ngo' %}
+                <a href="{{ url_for('ngo.verify') }}" class="btn btn-primary" style="border:1px solid white;">Verify Donations</a>
+            {% elif current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.dash') }}" class="btn btn-primary" style="border:1px solid white;">Governance Portal</a>
+            {% elif current_user.role == 'developer' %}
+                <a href="{{ url_for('admin.devdash') }}" class="btn btn-primary" style="border:1px solid white;">Developer Console</a>
+            {% else %}
+                <a href="{{ url_for('buyer.dash') }}" class="btn btn-primary" style="border:1px solid white;">My Dashboard</a>
+            {% endif %}
         </div>
-        <p style="margin-top:1.5rem;margin-bottom:0;font-size:1rem;">📍 Live figures for {{ label }}</p>
+        <p style="margin-top:1.5rem;margin-bottom:0;font-size:1rem;">Live platform figures for {{ label }}</p>
     </div>
 </div>
 <div class="container">
     <div class="stats-grid">
-        <div class="card stat-card"><div class="icon">✅</div><div class="num">{{ stats.verified }}</div><div>Verified Donations</div></div>
-        <div class="card stat-card"><div class="icon">💊</div><div class="num">{{ stats.avail }}</div><div>Available Medicines</div></div>
-        <div class="card stat-card"><div class="icon">👥</div><div class="num">{{ stats.users }}</div><div>Registered Users</div></div>
-        <div class="card stat-card"><div class="icon">🏥</div><div class="num">{{ stats.fulfilled }}</div><div>Urgent Needs Fulfilled</div></div>
+        <div class="card stat-card"><span class="stat-pill">verified</span><div class="num">{{ stats.verified }}</div><div>Verified Donations</div></div>
+        <div class="card stat-card"><span class="stat-pill">stock</span><div class="num">{{ stats.avail }}</div><div>Available Medicines</div></div>
+        <div class="card stat-card"><span class="stat-pill">community</span><div class="num">{{ stats.users }}</div><div>Registered Users</div></div>
+        <div class="card stat-card"><span class="stat-pill">fulfilled</span><div class="num">{{ stats.fulfilled }}</div><div>Urgent Needs Met</div></div>
     </div>
     <h2 style="text-align:center;margin-top:4rem;">How ReMedi Works</h2>
     <div class="workflow-steps">
-        <div class="step"><div class="step-icon">1</div><h4>Donate</h4><p>Sellers post medicines</p></div>
-        <div class="step"><div class="step-icon">2</div><h4>Verify</h4><p>NGOs inspect items</p></div>
-        <div class="step"><div class="step-icon">3</div><h4>Store</h4><p>Added to inventory</p></div>
-        <div class="step"><div class="step-icon">4</div><h4>Request</h4><p>Buyers request needs</p></div>
-        <div class="step"><div class="step-icon">5</div><h4>Get</h4><p>Safe collection</p></div>
+        <div class="step"><div class="step-icon">1</div><h4>Donate</h4><p>Donors list surplus medicines</p></div>
+        <div class="step"><div class="step-icon">2</div><h4>Verify</h4><p>NGOs inspect condition and expiry</p></div>
+        <div class="step"><div class="step-icon">3</div><h4>Store</h4><p>Added to city inventory</p></div>
+        <div class="step"><div class="step-icon">4</div><h4>Request</h4><p>Patients and clinics request items</p></div>
+        <div class="step"><div class="step-icon">5</div><h4>Exchange</h4><p>Safe pickup via pharmacy or NGO</p></div>
     </div>
-    <h2 style="text-align:center;margin-top:4rem;">Features</h2>
+    <h2 style="text-align:center;margin-top:4rem;">Platform Features</h2>
     <div class="feature-grid">
-        <div class="card"><h3>💊 Donate Medicines</h3><p>Sellers donate unused medicines safely.</p></div>
-        <div class="card"><h3>✅ NGO Verification</h3><p>Certified NGOs verify and manage donations.</p></div>
-        <div class="card"><h3>🔍 Search Inventory</h3><p>Buyers search available medicines in their city.</p></div>
-        <div class="card"><h3>📋 Request System</h3><p>Request specific quantities easily.</p></div>
-        <div class="card"><h3>🏪 Pharmacy Network</h3><p>Exchange medicines safely via pharmacies in your city.</p></div>
-        <div class="card"><h3>🚨 Urgent Needs</h3><p>Post and fulfill urgent medicine requests.</p></div>
+        <div class="card"><h3>Donate Medicines</h3><p>Surplus and unneeded medicines can be donated with batch number and expiry checks.</p></div>
+        <div class="card"><h3>NGO Quality Verification</h3><p>Accredited non-profits verify sealed status, batch, and safe shelf life before listing.</p></div>
+        <div class="card"><h3>City Inventory Search</h3><p>Browse live supply in your city with category filters and urgency tags.</p></div>
+        <div class="card"><h3>Structured Request Flow</h3><p>Request exact amounts needed with direct, NGO, or pharmacy pickup options.</p></div>
+        <div class="card"><h3>Accredited Pharmacy Network</h3><p>Exchange medicines through registered community pharmacies acting as drop points.</p></div>
+        <div class="card"><h3>Urgent Needs Board</h3><p>Post critical shortages and automatically match with newly verified donations.</p></div>
     </div>
     <div class="card" style="text-align:center;background:var(--primary-light);">
         <h3>We operate city by city to ensure medicines reach those who need them locally.</h3>
     </div>
     <div style="text-align:center;margin:4rem 0;">
-        <h2>Ready to help?</h2>
-        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Register Now</a>
+        <h2>Ready to participate?</h2>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('common.dash') }}" class="btn btn-primary" style="margin-top:1rem;">Go to Dashboard</a>
+        {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="margin-top:1rem;">Register Now</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

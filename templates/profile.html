@@ -8,12 +8,12 @@
         <hr style="margin:1.5rem 0;border:0;border-top:1px solid var(--border);">
         <div style="text-align:left;">
             <p><strong>Email:</strong> {{ current_user.email }}</p>
-            <p><strong>Phone:</strong> {{ current_user.phone }}</p>
-            <p><strong>Location:</strong> {{ current_user.locality }}, {{ current_user.city }} ({{ current_user.pincode }})</p>
+            <p><strong>Phone:</strong> {{ current_user.phone or 'Not provided' }}</p>
+            <p><strong>Location:</strong> {{ current_user.locality or 'Area' }}, {{ current_user.city }} ({{ current_user.pincode or 'No pincode' }})</p>
             <p><strong>Member since:</strong> {{ current_user.created_at }}</p>
-            {% if current_user.role == 'seller' %}
-                <p><strong>Donor Tier:</strong> {{ tier }}</p>
-                <p><strong>Verified Donations:</strong> {{ count }}</p>
+            {% if current_user.role in ('seller', 'user') and tier %}
+                <p><strong>Donor Tier:</strong> <span class="tier-badge tier-{{ tier|lower }}">{{ tier }}</span></p>
+                <p><strong>Verified Donations:</strong> {{ count }} batches</p>
             {% endif %}
             <p><strong>Account Status:</strong> <span class="badge badge-approved">Active</span></p>
         </div>
@@ -21,7 +21,7 @@
     <div class="card">
         <h3>Edit Profile</h3>
         <form method="POST" action="{{ url_for('common.profedit') }}">
-            <div class="form-group"><label class="form-label">Name</label><input type="text" name="name" class="form-control" value="{{ current_user.name }}" required></div>
+            <div class="form-group"><label class="form-label">Full Name</label><input type="text" name="name" class="form-control" value="{{ current_user.name }}" required></div>
             <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" value="{{ current_user.phone or '' }}"></div>
             <div class="form-group">
                 <label class="form-label">City</label>
@@ -30,7 +30,7 @@
                 </select>
             </div>
             <div class="form-group"><label class="form-label">Pincode</label><input type="text" name="pincode" class="form-control" value="{{ current_user.pincode or '' }}"></div>
-            <div class="form-group"><label class="form-label">Locality</label><input type="text" name="locality" class="form-control" value="{{ current_user.locality or '' }}"></div>
+            <div class="form-group"><label class="form-label">Locality / Area</label><input type="text" name="locality" class="form-control" value="{{ current_user.locality or '' }}"></div>
             <button type="submit" class="btn btn-primary" style="width:100%;">Save Changes</button>
         </form>
     </div>

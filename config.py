@@ -1,17 +1,18 @@
 import os
-cities=["Demo City "+str(n) for n in range(1,11)]
-defcity="Demo City 1"
-path=os.path.join(os.path.dirname(os.path.abspath(__file__)),".env")
-if(os.path.exists(path)):
-    with open(path,encoding="utf-8-sig") as f:
+envpath=os.path.join(os.path.dirname(os.path.abspath(__file__)),".env")
+if(os.path.exists(envpath)):
+    with open(envpath,encoding="utf-8-sig") as f:
         for line in f:
             line=line.strip()
             if(line and not line.startswith("#") and "=" in line):
-                key,val=line.split("=",1)
-                val=val.strip()
-                if(len(val)>1 and val[0]==val[-1] and val[0] in "\"'"):
-                    val=val[1:-1]
-                os.environ.setdefault(key.strip(),val)
+                k,v=line.split("=",1)
+                v=v.strip()
+                if(len(v)>1 and v[0]==v[-1] and v[0] in "\"'"):
+                    v=v[1:-1]
+                os.environ.setdefault(k.strip(),v)
+envcities=os.environ.get("REMEDI_CITIES") or os.environ.get("CITIES")
+cities=[c.strip() for c in envcities.split(",") if c.strip()] if envcities else ["Demo City "+str(n) for n in range(1,11)]
+defcity=os.environ.get("DEFAULT_CITY") or (cities[0] if cities else "Demo City 1")
 dbhost=os.environ.get("DB_HOST","localhost")
 dbport=int(os.environ.get("DB_PORT","3306"))
 dbname=os.environ.get("DB_NAME","remedi")

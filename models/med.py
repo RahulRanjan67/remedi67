@@ -4,7 +4,8 @@ def every():
 def cats():
     return query("SELECT * FROM medicine_categories ORDER BY category_name")
 def getid(name,cat):
-    row=query("SELECT medicine_id FROM medicines WHERE LOWER(medicine_name)=LOWER(%s)",(name,),one=True)
+    cname=str(name).strip()
+    row=query("SELECT medicine_id FROM medicines WHERE LOWER(medicine_name)=LOWER(%s)",(cname,),one=True)
     if(row):
         return row["medicine_id"]
-    return query("INSERT INTO medicines (medicine_name,category_id) VALUES (%s,%s)",(name,cat),commit=True)
+    return query("INSERT INTO medicines (medicine_name,category_id) VALUES (%s,%s)",(cname,cat),commit=True)

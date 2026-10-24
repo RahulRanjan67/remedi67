@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Audit Trail Records{% endblock %}
+{% block content %}
+<div class="container-wide" style="padding:2rem 1rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+        <div>
+            <h2>Regulatory Audit Log</h2>
+            <p class="text-muted">Immutable status transition history across all donations, requests, and quality reviews.</p>
+        </div>
+        <a href="{{ url_for('admin.dash') }}" class="btn btn-secondary">Back to Governance</a>
+    </div>
+
+    <div class="card table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Log ID</th>
+                    <th>Entity Type</th>
+                    <th>Record ID</th>
+                    <th>Prior Status</th>
+                    <th>New Status</th>
+                    <th>Changed By</th>
+                    <th>Logged Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in logs %}
+                <tr>
+                    <td>#{{ l.history_id }}</td>
+                    <td><span class="badge badge-info">{{ l.entity_type }}</span></td>
+                    <td>#{{ l.entity_id }}</td>
+                    <td>{{ l.old_status or 'INIT' }}</td>
+                    <td><strong>{{ l.new_status }}</strong></td>
+                    <td>{{ l.actor or 'System' }} (UID: {{ l.changed_by or '--' }})</td>
+                    <td><small class="text-muted">{{ l.changed_at }}</small></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="empty-state">No audit log records available.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

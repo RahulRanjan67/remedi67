@@ -1,35 +1,53 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container-wide" style="margin-top:2rem;">
-    <h2>My Requests</h2>
+    <h2>My Medicine Requests</h2>
     <div class="card table-responsive">
         <table>
-            <tr><th>Medicine</th><th>Qty</th><th>Fetch Method</th><th>Status</th><th>Date</th><th>Contact Info</th><th></th></tr>
+            <tr>
+                <th>Medicine</th>
+                <th>Qty</th>
+                <th>Pickup Method</th>
+                <th>Status</th>
+                <th>Date Requested</th>
+                <th>Fulfillment / Contact Info</th>
+                <th>Actions</th>
+            </tr>
             {% for r in requests %}
             <tr>
-                <td>{{ r.medicine_name }}<br><small class="text-muted">{{ r.city }}</small></td>
-                <td>{{ r.quantity_requested }}</td>
-                <td>{{ r.fetch_method }}</td>
+                <td><strong>{{ r.medicine_name }}</strong><br><small class="text-muted">{{ r.city }}</small></td>
+                <td>{{ r.quantity_requested }} units</td>
+                <td>{{ r.fetch_method|capitalize }}</td>
                 <td><span class="badge badge-{{ r.status|lower }}">{{ r.status|capitalize }}</span></td>
                 <td>{{ r.created_at }}</td>
                 <td>
-                    {% if r.status == 'approved' or r.status == 'completed' %}
+                    {% if r.status in ('approved', 'ready', 'completed') %}
                         {% if r.fetch_method == 'direct' %}
                             {% if r.contact %}
-                                Seller: {{ r.seller_name }} ({{ r.seller_phone }})
+                                Donor: {{ r.seller_name }} ({{ r.seller_phone or 'Phone available in contacts' }})
                             {% else %}
-                                Send a contact request to the seller from the search page
+                                <form method="POST" action="{{ url_for('buyer.reach', did=r.donation_id or 0) }}" style="margin:0;display:inline;">
+                                    <small class="text-muted">Direct exchange authorized.</small>
+                                </form>
                             {% endif %}
                         {% elif r.fetch_method == 'pharmacy' %}
-                            Pharmacy: {{ r.pharmacy_name }} ({{ r.pharmacy_phone }})<br><small>{{ r.pharmacy_address }}</small>
+                            <strong>Pharmacy:</strong> {{ r.pharmacy_name }} ({{ r.pharmacy_phone or '--' }})<br><small class="text-muted">{{ r.pharmacy_address }}</small>
                         {% elif r.fetch_method == 'ngo' %}
-                            NGO: {{ r.ngo_name }}
+                            <strong>NGO Office:</strong> {{ r.ngo_name }}
                         {% endif %}
+                        {% if r.status == 'ready' %}
+                            <br><small style="color:var(--success);font-weight:bold;">[Ready for Collection]</small>
+                        {% endif %}
+                    {% elif r.status == 'cancelled' %}
+                        <small class="text-muted">Cancelled by you</small>
+                    {% elif r.status == 'rejected' %}
+                        <small class="text-danger">Request could not be fulfilled</small>
                     {% else %}
-                        -
+                        <small class="text-muted">Pending NGO review</small>
                     {% endif %}
                 </td>
-                <td>
+                <td style="display:flex;gap:0.4rem;align-items:center;">
+                    <a href="{{ url_for('common.history', kind='request', eid=r.request_id) }}" class="btn btn-sm btn-secondary">History</a>
                     {% if r.status == 'pending' %}
                     <form method="POST" action="{{ url_for('buyer.cancel', rid=r.request_id) }}" style="margin:0;">
                         <button type="submit" class="btn btn-sm btn-danger" data-confirm="Cancel this request?">Cancel</button>
@@ -38,7 +56,7 @@
                 </td>
             </tr>
             {% else %}
-            <tr><td colspan="7" class="empty-state">No requests made yet.</td></tr>
+            <tr><td colspan="7" class="empty-state">No requests submitted yet. Use the search page to find medicines.</td></tr>
             {% endfor %}
         </table>
     </div>

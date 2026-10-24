@@ -4,8 +4,18 @@
     <h2>Search Medicines</h2>
     <form class="card" method="GET" action="{{ url_for('common.search') }}">
         <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-            <div class="form-group" style="flex:1;"><input type="text" name="q" placeholder="Medicine Name..." class="form-control" value="{{ q }}"></div>
-            <div class="form-group" style="flex:1;">
+            <div class="form-group" style="flex:2;min-width:180px;">
+                <input type="text" name="q" placeholder="Medicine name, formulation..." class="form-control" value="{{ q }}">
+            </div>
+            <div class="form-group" style="flex:1;min-width:140px;">
+                <select name="category_id" class="form-select">
+                    <option value="">All Categories</option>
+                    {% for cat in cats %}
+                    <option value="{{ cat.category_id }}" {% if catid and catid|int == cat.category_id %}selected{% endif %}>{{ cat.category_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;min-width:140px;">
                 <select name="city" class="form-select">
                     {% if free %}<option value="">All cities</option>{% endif %}
                     {% for c in cities %}<option value="{{ c }}" {% if c == sel %}selected{% endif %}>{{ c }}</option>{% endfor %}
@@ -17,23 +27,58 @@
     <div class="dashboard-grid">
         {% for item in items %}
         <div class="card">
-            <h4>{{ item.medicine_name }} <span class="badge badge-{{ (item.condition_status or 'sealed')|lower }}">{{ item.condition_status or 'sealed' }}</span></h4>
-            <p><strong>Qty:</strong> {{ item.quantity_available }}</p>
+            <h4>
+                {{ item.medicine_name }}
+                <span class="badge badge-{{ (item.condition_status or 'sealed')|lower }}">{{ item.condition_status or 'sealed' }}</span>
+                {% if item.ngo_id %}
+                <span class="badge badge-verified" title="Recommended with verified batch">Recommended</span>
+                {% if item.batch_number %}
+                <span class="badge badge-outline" title="Verified Batch Number">Batch: {{ item.batch_number }}</span>
+                {% endif %}
+                {% else %}
+                <span class="badge badge-secondary" title="Direct listing from seller - unverified batch">Direct Listing</span>
+                {% endif %}
+                {% if item.needed %}
+                <span class="badge badge-pending" title="Matched to an open urgent need in this city">Urgent Need</span>
+                {% endif %}
+            </h4>
+            <p><strong>Category:</strong> {{ item.category_name or 'General' }}</p>
+            <p><strong>Available Qty:</strong> {{ item.quantity_available }} units</p>
             <p><strong>Expiry:</strong> <span class="expiry-{{ item.exp }}">{{ item.expiry_date }}</span></p>
-            <p><strong>Location:</strong> {{ item.locality or 'Main' }}, {{ item.city }}</p>
-            <p><strong>Donor:</strong> {{ item.seller_name or 'Verified Donor' }}</p>
-            <p><strong>NGO:</strong> {{ item.ngo_name }}</p>
-            {% if current_user.is_authenticated and current_user.role == 'buyer' %}
-                <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-                    <a href="{{ url_for('buyer.ask', iid=item.inventory_id) }}" class="btn btn-sm btn-primary">Request</a>
-                    <form method="POST" action="{{ url_for('buyer.reach', did=item.donation_id) }}" style="margin:0;">
-                        <button type="submit" class="btn btn-sm btn-secondary">Contact Seller</button>
-                    </form>
+            <p><strong>Location:</strong> {{ item.locality or 'Central' }}, {{ item.city }}</p>
+            <p><strong>Donor:</strong> {{ item.seller_name or 'Community Donor' }}</p>
+            <p><strong>Managing NGO:</strong> {{ item.ngo_name or 'None (Direct Seller Listing)' }}</p>
+            {% if current_user.is_authenticated and current_user.role in ('buyer', 'user', 'ngo') %}
+                <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                    {% if current_user.user_id != item.seller_id %}
+                        <a href="{{ url_for('buyer.ask', iid=item.inventory_id) }}" class="btn btn-sm btn-primary">
+                            {% if current_user.role == 'ngo' %}Procure / Buy{% else %}Request{% endif %}
+                        </a>
+                        {% if item.contact_status == 'pending' %}
+                            <span class="badge badge-pending">Contact Pending</span>
+                        {% elif item.contact_status == 'approved' %}
+                            <span class="badge badge-verified">Contact Approved</span>
+                            <a href="{{ url_for('buyer.contacts') }}" class="btn btn-sm btn-outline">View Details</a>
+                        {% elif item.contact_status == 'rejected' %}
+                            <span class="badge badge-rejected">Contact Declined</span>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('buyer.reach', did=item.donation_id) }}" style="margin:0;">
+                                <button type="submit" class="btn btn-sm btn-secondary">
+                                    {% if current_user.role == 'ngo' %}Buy from Seller{% else %}Contact Donor{% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge badge-outline">Your Listing</span>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>
         {% else %}
-        <div class="empty-state"><i>🔍</i><p>No medicines found{% if sel %} in {{ sel }}{% endif %}.</p></div>
+        <div class="empty-state">
+            <p>No medicines currently available in {{ sel or 'this selection' }}.</p>
+            <p style="font-size:0.9rem;margin-top:0.5rem;">Try searching without filters or check back later.</p>
+        </div>
         {% endfor %}
     </div>
 </div>
