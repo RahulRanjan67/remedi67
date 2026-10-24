@@ -45,6 +45,12 @@
                     <a href="{{ url_for('common.board') }}" class="nav-link">Notice Board</a>
                     <a href="{{ url_for('common.pharms') }}" class="nav-link">Pharmacies</a>
                     <a href="{{ url_for('buyer.contacts') }}" class="nav-link">Contacts</a>
+                {% elif current_user.role == 'pharmacy' %}
+                    <a href="{{ url_for('pharmacy.dash') }}" class="nav-link">Dispensary</a>
+                    <a href="{{ url_for('pharmacy.verify') }}" class="nav-link">Verify Pass</a>
+                    <a href="{{ url_for('common.search') }}" class="nav-link">Inventory</a>
+                    <a href="{{ url_for('common.pharms') }}" class="nav-link">Pharmacies</a>
+                    <a href="{{ url_for('common.board') }}" class="nav-link">Notice Board</a>
                 {% elif current_user.role == 'ngo' %}
                     <a href="{{ url_for('ngo.dash') }}" class="nav-link">Dashboard</a>
                     <a href="{{ url_for('common.search') }}" class="nav-link">Search & Buy</a>

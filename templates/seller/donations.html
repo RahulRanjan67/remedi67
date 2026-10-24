@@ -28,7 +28,10 @@
                 </td>
                 <td>{{ d.created_at }}</td>
                 <td>
-                    <a href="{{ url_for('common.history', kind='donation', eid=d.donation_id) }}" class="btn btn-sm btn-secondary">Timeline</a>
+                    <div style="display:flex;gap:0.35rem;align-items:center;flex-wrap:wrap;">
+                        <a href="{{ url_for('common.history', kind='donation', eid=d.donation_id) }}" class="btn btn-sm btn-secondary">Timeline</a>
+                        <a href="{{ url_for('common.label_don', did=d.donation_id) }}" class="btn btn-sm btn-outline" target="_blank">QR Label</a>
+                    </div>
                 </td>
             </tr>
             {% else %}

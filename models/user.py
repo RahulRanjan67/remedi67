@@ -24,7 +24,7 @@ def pending(city=None):
 def everyone(city=None):
     return query("SELECT * FROM users WHERE (%s IS NULL OR city=%s) ORDER BY role,user_id",(city,city))
 def stats(city=None):
-    row=query("SELECT COUNT(*) AS total,SUM(role='user') AS users,SUM(role IN('seller','buyer')) AS legacy,SUM(role='ngo') AS ngos,SUM(role='ngo' AND is_approved=0) AS pending,SUM(role='admin') AS admins FROM users WHERE (%s IS NULL OR city=%s)",(city,city),one=True)
+    row=query("SELECT COUNT(*) AS total,SUM(role='user') AS users,SUM(role IN('seller','buyer')) AS legacy,SUM(role='ngo') AS ngos,SUM(role='pharmacy') AS pharms,SUM(role='ngo' AND is_approved=0) AS pending,SUM(role='admin') AS admins FROM users WHERE (%s IS NULL OR city=%s)",(city,city),one=True)
     out={}
     for k in row:
         out[k]=int(row[k] or 0)

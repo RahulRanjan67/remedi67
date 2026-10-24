@@ -24,6 +24,9 @@
                 <form method="POST" action="{{ url_for('admin.devrefresh') }}" style="margin:0;">
                     <button type="submit" class="btn btn-sm btn-secondary" style="background:#21262d;color:#58a6ff;border:1px solid #30363d;">[>] Trigger Urgent Matching Refresh</button>
                 </form>
+                <form method="POST" action="{{ url_for('admin.devquarantine') }}" style="margin:0;">
+                    <button type="submit" class="btn btn-sm btn-secondary" style="background:#21262d;color:#f85149;border:1px solid #30363d;">[>] Run Expiry Quarantine Scan</button>
+                </form>
                 <form method="POST" action="{{ url_for('admin.devclear') }}" style="margin:0;">
                     <button type="submit" class="btn btn-sm btn-secondary" style="background:#21262d;color:#58a6ff;border:1px solid #30363d;">[>] Flush Notification TTL Cache</button>
                 </form>

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Donation Label #{{ d.donation_id }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:650px;margin:2rem auto;padding:0 1rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.5rem;">
+        <a href="{{ url_for('seller.mine') }}" class="btn btn-secondary btn-sm">&larr; Back to My Donations</a>
+        <button onclick="window.print()" class="btn btn-primary btn-sm">Print Package Label</button>
+    </div>
+
+    <div class="card" style="border:2px dashed #94a3b8;box-shadow:0 4px 14px rgba(0,0,0,0.06);padding:2rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--border);padding-bottom:1rem;margin-bottom:1.5rem;">
+            <div>
+                <span class="badge badge-primary" style="font-size:0.75rem;text-transform:uppercase;">Package Inspection Label</span>
+                <h3 style="margin:0.25rem 0 0;">Donation #DON-{{ '%05d'|format(d.donation_id) }}</h3>
+            </div>
+            <span class="badge badge-{{ d.status|lower }}">{{ d.status|capitalize }}</span>
+        </div>
+
+        <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+            <div style="flex:1;min-width:240px;">
+                <div style="margin-bottom:0.75rem;">
+                    <label class="text-muted" style="font-size:0.75rem;text-transform:uppercase;font-weight:600;">Medicine Formulation</label>
+                    <div style="font-size:1.2rem;font-weight:700;">{{ d.medicine_name }}</div>
+                    <small class="text-muted">{{ d.category_name or 'General' }}</small>
+                </div>
+
+                <div style="margin-bottom:0.75rem;">
+                    <label class="text-muted" style="font-size:0.75rem;text-transform:uppercase;font-weight:600;">Quantity &amp; Condition</label>
+                    <div style="font-weight:600;">{{ d.quantity }} Units &bull; <span class="badge badge-{{ d.condition_status }}">{{ d.condition_status|capitalize }}</span></div>
+                </div>
+
+                <div style="margin-bottom:0.75rem;">
+                    <label class="text-muted" style="font-size:0.75rem;text-transform:uppercase;font-weight:600;">Pharma Batch &amp; Expiry</label>
+                    <div>Batch: <strong>{{ d.batch_number or 'Unspecified' }}</strong></div>
+                    <div>Expiry: <strong>{{ d.expiry_date }}</strong></div>
+                </div>
+
+                <div>
+                    <label class="text-muted" style="font-size:0.75rem;text-transform:uppercase;font-weight:600;">Originating Donor</label>
+                    <div>{{ d.seller_name }} ({{ d.city }})</div>
+                </div>
+            </div>
+
+            <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+                <img src="{{ url_for('common.qr_don', did=d.donation_id) }}" alt="Donation QR Code" style="width:160px;height:160px;display:block;margin:0 auto;">
+                <small class="text-muted" style="display:block;margin-top:0.5rem;font-size:0.75rem;">Scan to Inspect &amp; Verify</small>
+            </div>
+        </div>
+
+        <div style="margin-top:1.5rem;padding:0.75rem;background:#f8fafc;border-radius:6px;font-size:0.8rem;color:#64748b;text-align:center;">
+            Attach this label securely to the outer medicine carton or blister strip prior to hand-off.
+        </div>
+    </div>
+</div>
+{% endblock %}

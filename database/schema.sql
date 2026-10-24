@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(100) NOT NULL,
   email VARCHAR(150) UNIQUE NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
-  role ENUM('developer','admin','ngo','user','seller','buyer') NOT NULL,
+  role ENUM('developer','admin','ngo','user','seller','buyer','pharmacy') NOT NULL,
   phone VARCHAR(20),
   city VARCHAR(100),
   pincode VARCHAR(10),
@@ -23,12 +23,14 @@ CREATE TABLE IF NOT EXISTS ngo_profiles (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS pharmacies (
   pharmacy_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NULL,
   name VARCHAR(200) NOT NULL,
   address VARCHAR(500) NOT NULL,
   city VARCHAR(100) NOT NULL,
   pincode VARCHAR(10) NOT NULL,
   phone VARCHAR(20),
   is_active TINYINT(1) DEFAULT 1,
+  FOREIGN KEY (user_id) REFERENCES users(user_id),
   INDEX idxcity (city,pincode)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS medicine_categories (

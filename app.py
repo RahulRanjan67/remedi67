@@ -3,7 +3,7 @@ from flask import Flask,render_template,session
 from flask_login import LoginManager,current_user
 import config
 from models import user,notif
-from routes import auth,common,seller,buyer,ngo,admin
+from routes import auth,common,seller,buyer,ngo,admin,pharmacy
 from util import getcity,free
 app=Flask(__name__,static_folder="public",static_url_path="")
 app.config.from_object(config)
@@ -15,6 +15,18 @@ lm.login_message_category="info"
 def loaduser(uid):
     data=user.byid(int(uid))
     return user.account(data) if data else None
+_last_quarantine=0
+@app.before_request
+def auto_quarantine():
+    global _last_quarantine
+    now=time.time()
+    if now-_last_quarantine>3600:
+        _last_quarantine=now
+        try:
+            from models import inv
+            inv.quarantine_expired()
+        except Exception:
+            pass
 @app.context_processor
 def ctx():
     unread=0
@@ -34,6 +46,7 @@ app.register_blueprint(seller.bp)
 app.register_blueprint(buyer.bp)
 app.register_blueprint(ngo.bp)
 app.register_blueprint(admin.bp)
+app.register_blueprint(pharmacy.bp)
 @app.errorhandler(403)
 def e403(err):
     return render_template("errors/403.html"),403

@@ -22,7 +22,12 @@
             <p><strong>Address:</strong> {{ p.address }}</p>
             <p><strong>City & PIN:</strong> {{ p.city }} - {{ p.pincode }}</p>
             {% if p.phone %}<p><strong>Phone:</strong> {{ p.phone }}</p>{% endif %}
-            <span class="badge badge-approved" style="align-self:flex-start;margin-top:0.5rem;">Verified Partner</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:0.5rem;">
+                <span class="badge badge-approved">Verified Partner</span>
+                <a href="https://www.google.com/maps/search/?api=1&query={{ p.name|urlencode }}+{{ p.address|urlencode }}+{{ p.city|urlencode }}" target="_blank" class="btn btn-sm btn-outline" style="display:inline-flex;align-items:center;gap:0.35rem;" title="Scan QR or open Maps">
+                    <img src="{{ url_for('common.qr_pharm', pid=p.pharmacy_id) }}" style="width:18px;height:18px;vertical-align:middle;" alt="QR"> Maps Directions
+                </a>
+            </div>
         </div>
         {% else %}
         <div class="empty-state"><p>No registered pharmacies yet. Register your local pharmacy!</p></div>

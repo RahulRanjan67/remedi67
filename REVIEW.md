@@ -289,3 +289,51 @@ The root causes of Vercel latency and dropped connections are identified below:
    - Implement `LIMIT 20 OFFSET ?` for high-volume medicine search results and status history logs to keep database response times under 50ms.
 5. **Rate Limiting on Authentication Endpoints**:
    - Add IP and user-based throttling (`Flask-Limiter`) to `/auth/login` to thwart credential stuffing and brute-force attacks.
+
+---
+
+## 8. QR Code Integration & Verification Architecture
+
+To streamline physical medicine handovers and package intake, four QR code integration points have been implemented:
+
+1. **Digital Medicine Pickup Pass (`/pass/request/<rid>`)**:
+   - For approved and ready requests, recipients can generate a printable or mobile pass.
+   - Embeds a crisp SVG QR code linking to `/pass/request/<rid>`.
+   - Pharmacists and NGO officers can scan the code to instantly verify patient identity and authorized medicine/dosage.
+
+2. **Donation Package Label (`/label/donation/<did>`)**:
+   - Donors can print a physical package label to tape onto medicine boxes or blister packs.
+   - Contains donation ID, batch number, medicine formulation, expiry date, and a scannable QR code.
+   - NGO intake volunteers scan the QR to pre-populate inspection workflows in seconds.
+
+3. **Pharmacy GPS Direction QR (`/qr/pharmacy/<pid>`)**:
+   - Each registered pharmacy card generates a QR code encoding turn-by-turn navigation on Google Maps.
+   - Desktop/tablet users can scan the code with their smartphone camera for instant mobile navigation to the dispensary.
+
+4. **Batch Authenticity QR (`/qr/inventory/<iid>`)**:
+   - Links directly to the immutable audit trail on `/status-history/donation/<did>`.
+
+---
+
+## 9. Implemented Architectural Enhancements
+
+All user-accepted feature enhancements have been implemented following the author's compact coding style:
+
+1. **Urgent Needs Matching & Direct Pre-Allocation**:
+   - Integrated `urgent.match_donation(did, mid, city, qty, donor_name, urgent_id)` in `models/urgent.py` and `routes/seller.py`.
+   - The medicine donation interface (`templates/seller/donate.html`) dynamically displays active urgent shortages in the donor's city.
+   - Donors can click "Fulfill Need" to pre-fill the medicine name and requested quantity.
+   - When submitted, matching patients are alerted immediately via notifications, bridging supply gaps in real time.
+
+2. **Direct Pharmacist Login Role & Dispensary Dashboard**:
+   - Added `'pharmacy'` role to `users.role` ENUM and linked `pharmacies.user_id` foreign key.
+   - Created dedicated `routes/pharmacy.py` with `/pharmacy/dashboard`, `/pharmacy/ready/<rid>`, `/pharmacy/dispense/<rid>`, and `/pharmacy/verify-pass`.
+   - Partner pharmacists can log in directly, view assigned requests, review Digital Pickup Passes, and confirm medication handovers.
+   - Integrated dispensary navigation links into `templates/base.html` and routing in `common.dash()`.
+   - Seeded 10 demo pharmacist accounts (`pharm1@example.com` .. `pharm10@example.com`) across 10 cities.
+
+3. **Automated Expiry Quarantining Cron**:
+   - Implemented `inv.quarantine_expired()` in `models/inv.py` to zero out stock for expired inventory, log transitions to `status_history`, and cancel pending requests with patient notifications.
+   - Added public cron route `/cron/quarantine` (returning JSON status) for external schedulers / Vercel Cron.
+   - Added Developer Diagnostic Console action (`/admin/developer/quarantine-expired`) for on-demand quarantine sweeps.
+   - Added automated periodic background check in `app.before_request` with an in-memory 1-hour cooldown.

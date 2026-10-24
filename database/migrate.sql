@@ -25,3 +25,9 @@ WHERE status='pending' AND donation_id NOT IN (SELECT donation_id FROM inventory
 
 -- 7. Convert existing buyer/seller demo accounts to 'user' role (optional but recommended)
 -- UPDATE users SET role='user' WHERE role IN ('buyer','seller') AND email LIKE '%@example.com';
+
+-- 8. Add 'pharmacy' role to users
+ALTER TABLE users MODIFY COLUMN role ENUM('developer','admin','ngo','user','seller','buyer','pharmacy') NOT NULL;
+
+-- 9. Add user_id column to pharmacies
+ALTER TABLE pharmacies ADD COLUMN user_id INT NULL;

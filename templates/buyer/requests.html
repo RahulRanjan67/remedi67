@@ -48,6 +48,9 @@
                 </td>
                 <td style="display:flex;gap:0.4rem;align-items:center;">
                     <a href="{{ url_for('common.history', kind='request', eid=r.request_id) }}" class="btn btn-sm btn-secondary">History</a>
+                    {% if r.status in ('approved', 'ready') %}
+                    <a href="{{ url_for('common.pass_req', rid=r.request_id) }}" class="btn btn-sm btn-primary">Pickup Pass (QR)</a>
+                    {% endif %}
                     {% if r.status == 'pending' %}
                     <form method="POST" action="{{ url_for('buyer.cancel', rid=r.request_id) }}" style="margin:0;">
                         <button type="submit" class="btn btn-sm btn-danger" data-confirm="Cancel this request?">Cancel</button>

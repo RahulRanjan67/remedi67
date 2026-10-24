@@ -79,7 +79,16 @@ document.addEventListener("DOMContentLoaded",()=>{
                         if(p.phone){
                             add(card,"p","Phone: "+p.phone)
                         }
-                        add(card,"span","Verified Partner","badge badge-approved")
+                        const row=add(card,"div","","")
+                        row.style.cssText="display:flex;justify-content:space-between;align-items:center;margin-top:0.75rem;padding-top:0.5rem;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:0.5rem;"
+                        add(row,"span","Verified Partner","badge badge-approved")
+                        const link=add(row,"a"," Maps Directions","btn btn-sm btn-outline")
+                        link.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(p.name+" "+p.address+" "+p.city)
+                        link.target="_blank"
+                        const qrImg=document.createElement("img")
+                        qrImg.src="/qr/pharmacy/"+p.pharmacy_id
+                        qrImg.style.cssText="width:18px;height:18px;vertical-align:middle;margin-right:4px;"
+                        link.prepend(qrImg)
                     })
                 })
         })

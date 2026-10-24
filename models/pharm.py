@@ -6,5 +6,9 @@ def bypin(pin,city=None):
 def cityof(pid):
     row=query("SELECT city FROM pharmacies WHERE pharmacy_id=%s AND is_active=1",(pid,),one=True)
     return row["city"] if row else None
-def create(name,address,city,pin,phone):
-    return query("INSERT INTO pharmacies (name,address,city,pincode,phone,is_active) VALUES (%s,%s,%s,%s,%s,1)",(name,address,city,pin,phone),commit=True)
+def byuser(uid):
+    return query("SELECT * FROM pharmacies WHERE user_id=%s AND is_active=1",(uid,),one=True)
+def byid(pid):
+    return query("SELECT * FROM pharmacies WHERE pharmacy_id=%s",(pid,),one=True)
+def create(name,address,city,pin,phone,uid=None):
+    return query("INSERT INTO pharmacies (user_id,name,address,city,pincode,phone,is_active) VALUES (%s,%s,%s,%s,%s,%s,1)",(uid,name,address,city,pin,phone),commit=True)

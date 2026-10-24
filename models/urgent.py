@@ -13,6 +13,25 @@ def bybuyer(bid,city=None):
     return query("SELECT un.*,m.medicine_name FROM urgent_needs un JOIN medicines m ON un.medicine_id=m.medicine_id WHERE un.buyer_id=%s AND (%s IS NULL OR un.city=%s) ORDER BY un.created_at DESC,un.urgent_id DESC",(bid,city,city))
 def count(status=None,city=None):
     return query("SELECT COUNT(*) AS c FROM urgent_needs WHERE (%s IS NULL OR status=%s) AND (%s IS NULL OR city=%s)",(status,status,city,city),one=True)["c"]
+def match_donation(did,mid,city,qty,donor_name="A donor",urgent_id=None):
+    matches=[]
+    if urgent_id:
+        target=query("SELECT un.*,u.name AS buyer_name FROM urgent_needs un JOIN users u ON un.buyer_id=u.user_id WHERE un.urgent_id=%s AND un.status='open'",(urgent_id,),one=True)
+        if target:
+            matches.append(target)
+    if not matches:
+        matches=query("SELECT un.*,u.name AS buyer_name FROM urgent_needs un JOIN users u ON un.buyer_id=u.user_id WHERE un.medicine_id=%s AND un.status='open' AND (%s IS NULL OR un.city=%s) ORDER BY un.created_at",(mid,city,city)) or []
+    if not matches:
+        return 0
+    medrow=query("SELECT medicine_name FROM medicines WHERE medicine_id=%s",(mid,),one=True)
+    mname=medrow["medicine_name"] if medrow else "medication"
+    for un in matches:
+        query(
+            "INSERT INTO notifications (user_id,message) VALUES (%s,%s)",
+            (un["buyer_id"],f"Urgent Need In Stock: {donor_name} just donated {qty} unit(s) of {mname} in {city} (Donation #{did}). You can now submit a request from inventory."),
+            commit=True
+        )
+    return len(matches)
 def refresh(city=None):
     k=city or "all"
     if time.time()-lastref.get(k,0)<60:

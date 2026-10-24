@@ -75,3 +75,10 @@ def devclear():
     session.pop("unread_ts",None)
     flash("Flushed session notification cache","info")
     return redirect(url_for("admin.devdash"))
+@bp.route("/developer/quarantine-expired",methods=["POST"])
+@login_required
+@needrole("developer","admin")
+def devquarantine():
+    count=inv.quarantine_expired()
+    flash(f"Expiry quarantine scan complete: {count} item(s) quarantined.","success")
+    return redirect(url_for("admin.devdash"))

@@ -1,8 +1,8 @@
-from flask import Blueprint,render_template,request,redirect,url_for,flash,jsonify,abort
+from flask import Blueprint,render_template,request,redirect,url_for,flash,jsonify,abort,Response
 from flask_login import login_required,current_user
 from db import query
 from models import inv,urgent,notif,pharm,don,user,med,contact
-from util import fixcity,setcity,scope,free,markexp
+from util import fixcity,setcity,scope,free,markexp,make_qr_svg
 bp=Blueprint("common",__name__)
 @bp.route("/")
 def index():
@@ -28,6 +28,8 @@ def dash():
         return redirect(url_for("admin.dash"))
     if role=="ngo":
         return redirect(url_for("ngo.dash"))
+    if role=="pharmacy":
+        return redirect(url_for("pharmacy.dash"))
     if role in("seller","buyer"):
         return redirect(url_for("buyer.dash"))
     return redirect(url_for("buyer.dash"))
@@ -71,7 +73,7 @@ def pharmadd():
         city=fixcity(f.get("city"))
         pin=f.get("pincode","").strip()
         if name and address and city and pin:
-            pharm.create(name,address,city,pin,f.get("phone","").strip())
+            pharm.create(name,address,city,pin,f.get("phone","").strip(),current_user.user_id if current_user.role=="pharmacy" else None)
             if not free():
                 setcity(city)
             flash(f"Pharmacy \"{name}\" registered as a designated exchange point.","success")
@@ -143,3 +145,64 @@ def history(kind,eid):
                 abort(403)
     rows=query("SELECT * FROM status_history WHERE entity_type=%s AND entity_id=%s ORDER BY changed_at DESC,history_id DESC",(kind,eid))
     return render_template("status_history.html",history=rows)
+
+@bp.route("/cron/quarantine",methods=["GET","POST"])
+def cron_quarantine():
+    count=inv.quarantine_expired()
+    return jsonify({"status":"ok","quarantined":count})
+
+@bp.route("/qr/request/<int:rid>")
+@login_required
+def qr_req(rid):
+    r=query("SELECT r.*,m.medicine_name,i.city,u.name AS buyer_name FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id JOIN medicines m ON i.medicine_id=m.medicine_id JOIN users u ON r.buyer_id=u.user_id WHERE r.request_id=%s",(rid,),one=True)
+    if not r:
+        abort(404)
+    if current_user.role not in("admin","developer","ngo","pharmacy") and r["buyer_id"]!=current_user.user_id:
+        abort(403)
+    verify_url=url_for("common.pass_req",rid=rid,_external=True)
+    svg=make_qr_svg(verify_url)
+    return Response(svg,mimetype="image/svg+xml")
+
+@bp.route("/qr/donation/<int:did>")
+@login_required
+def qr_don(did):
+    d=query("SELECT d.*,m.medicine_name FROM donations d JOIN medicines m ON d.medicine_id=m.medicine_id WHERE d.donation_id=%s",(did,),one=True)
+    if not d:
+        abort(404)
+    if current_user.role not in("admin","developer","ngo","pharmacy") and d["seller_id"]!=current_user.user_id:
+        abort(403)
+    verify_url=url_for("common.label_don",did=did,_external=True)
+    svg=make_qr_svg(verify_url)
+    return Response(svg,mimetype="image/svg+xml")
+
+@bp.route("/qr/pharmacy/<int:pid>")
+def qr_pharm(pid):
+    p=query("SELECT * FROM pharmacies WHERE pharmacy_id=%s AND is_active=1",(pid,),one=True)
+    if not p:
+        abort(404)
+    qname=str(p["name"]).replace(" ","+")
+    qaddr=str(p["address"]).replace(" ","+")
+    qcity=str(p["city"]).replace(" ","+")
+    maps_url=f"https://www.google.com/maps/search/?api=1&query={qname}+{qaddr}+{qcity}"
+    svg=make_qr_svg(maps_url)
+    return Response(svg,mimetype="image/svg+xml")
+
+@bp.route("/pass/request/<int:rid>")
+@login_required
+def pass_req(rid):
+    r=query("SELECT r.*,m.medicine_name,c.category_name,i.city,i.condition_status,u.name AS buyer_name,u.phone AS buyer_phone,u.email AS buyer_email,p.name AS pharmacy_name,p.address AS pharmacy_address,p.phone AS pharmacy_phone,n.name AS ngo_name FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id JOIN medicines m ON i.medicine_id=m.medicine_id LEFT JOIN medicine_categories c ON m.category_id=c.category_id JOIN users u ON r.buyer_id=u.user_id LEFT JOIN pharmacies p ON r.pharmacy_id=p.pharmacy_id LEFT JOIN users n ON i.ngo_id=n.user_id WHERE r.request_id=%s",(rid,),one=True)
+    if not r:
+        abort(404)
+    if current_user.role not in("admin","developer","ngo","pharmacy") and r["buyer_id"]!=current_user.user_id:
+        abort(403)
+    return render_template("buyer/pickup_pass.html",r=r)
+
+@bp.route("/label/donation/<int:did>")
+@login_required
+def label_don(did):
+    d=query("SELECT d.*,m.medicine_name,c.category_name,u.name AS seller_name FROM donations d JOIN medicines m ON d.medicine_id=m.medicine_id LEFT JOIN medicine_categories c ON m.category_id=c.category_id JOIN users u ON d.seller_id=u.user_id WHERE d.donation_id=%s",(did,),one=True)
+    if not d:
+        abort(404)
+    if current_user.role not in("admin","developer","ngo","pharmacy") and d["seller_id"]!=current_user.user_id:
+        abort(403)
+    return render_template("seller/donation_label.html",d=d)

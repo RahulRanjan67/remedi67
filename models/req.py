@@ -29,7 +29,36 @@ def byngo(ngoid):
     ucity=u["city"] if u else None
     return query("SELECT r.*,m.medicine_name,i.city,i.condition_status,u.name AS buyer_name,u.phone AS buyer_phone,p.name AS pharmacy_name FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id JOIN medicines m ON i.medicine_id=m.medicine_id JOIN users u ON r.buyer_id=u.user_id LEFT JOIN pharmacies p ON r.pharmacy_id=p.pharmacy_id WHERE (i.ngo_id=%s OR (i.ngo_id IS NULL AND (%s IS NULL OR i.city=%s))) ORDER BY r.created_at DESC,r.request_id DESC",(ngoid,ucity,ucity))
 def byid(rid):
-    return query("SELECT r.*,m.medicine_name,i.ngo_id,i.city,i.medicine_id,u.name AS buyer_name FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id JOIN medicines m ON i.medicine_id=m.medicine_id JOIN users u ON r.buyer_id=u.user_id WHERE r.request_id=%s",(rid,),one=True)
+    return query("SELECT r.*,m.medicine_name,i.ngo_id,i.city,i.medicine_id,u.name AS buyer_name,u.phone AS buyer_phone,u.email AS buyer_email,p.name AS pharmacy_name,p.address AS pharmacy_address FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id JOIN medicines m ON i.medicine_id=m.medicine_id JOIN users u ON r.buyer_id=u.user_id LEFT JOIN pharmacies p ON r.pharmacy_id=p.pharmacy_id WHERE r.request_id=%s",(rid,),one=True)
+def bypharmacy(pid):
+    return query("SELECT r.*,m.medicine_name,c.category_name,i.city,i.condition_status,i.expiry_date,d.batch_number,u.name AS buyer_name,u.phone AS buyer_phone,u.email AS buyer_email FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id JOIN medicines m ON i.medicine_id=m.medicine_id LEFT JOIN medicine_categories c ON m.category_id=c.category_id JOIN donations d ON i.donation_id=d.donation_id JOIN users u ON r.buyer_id=u.user_id WHERE r.pharmacy_id=%s AND r.fetch_method='pharmacy' ORDER BY (r.status IN ('approved','ready')) DESC, r.created_at DESC",(pid,))
+def pharmacy_stats(pid):
+    row=query("SELECT COUNT(*) AS total,COALESCE(SUM(status='approved'),0) AS waiting,COALESCE(SUM(status='ready'),0) AS ready,COALESCE(SUM(status='completed'),0) AS dispensed FROM requests WHERE pharmacy_id=%s AND fetch_method='pharmacy'",(pid,),one=True)
+    return {k:int(row[k] or 0) for k in row}
+def ready_pharmacy(rid,pid,actor_uid):
+    def work(cur):
+        cur.execute("SELECT r.*,m.medicine_name,p.name AS pharmacy_name FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id JOIN medicines m ON i.medicine_id=m.medicine_id JOIN pharmacies p ON r.pharmacy_id=p.pharmacy_id WHERE r.request_id=%s AND r.pharmacy_id=%s FOR UPDATE",(rid,pid))
+        r=cur.fetchone()
+        if not r:
+            raise ValueError("Request not found at this pharmacy")
+        if r["status"]!="approved":
+            raise ValueError("Request is not in approved state")
+        cur.execute("UPDATE requests SET status='ready' WHERE request_id=%s",(rid,))
+        cur.execute(logsql,("request",rid,"approved","ready",actor_uid))
+        cur.execute(notesql,(r["buyer_id"],f"Your medicine {r['medicine_name']} (Request #{rid}) is packaged and ready for pickup at {r['pharmacy_name']}."))
+    txn(work)
+def dispense_pharmacy(rid,pid,actor_uid):
+    def work(cur):
+        cur.execute("SELECT r.*,m.medicine_name,p.name AS pharmacy_name FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id JOIN medicines m ON i.medicine_id=m.medicine_id JOIN pharmacies p ON r.pharmacy_id=p.pharmacy_id WHERE r.request_id=%s AND r.pharmacy_id=%s FOR UPDATE",(rid,pid))
+        r=cur.fetchone()
+        if not r:
+            raise ValueError("Request not found at this pharmacy")
+        if r["status"] not in("approved","ready"):
+            raise ValueError("Request must be approved or ready before dispensing")
+        cur.execute("UPDATE requests SET status='completed' WHERE request_id=%s",(rid,))
+        cur.execute(logsql,("request",rid,r["status"],"completed",actor_uid))
+        cur.execute(notesql,(r["buyer_id"],f"Your request #{rid} for {r['medicine_name']} has been dispensed by {r['pharmacy_name']}. Thank you!"))
+    txn(work)
 def approve(rid,ngoid):
     def work(cur):
         cur.execute("SELECT r.buyer_id,r.inventory_id,r.quantity_requested,r.status,i.ngo_id,i.quantity_available FROM requests r JOIN inventory i ON r.inventory_id=i.inventory_id WHERE r.request_id=%s FOR UPDATE",(rid,))

@@ -1,7 +1,7 @@
 from flask import Blueprint,render_template,request,redirect,url_for,flash
 from flask_login import login_required,current_user
 from util import needrole,daysleft,getcity,scope,markexp,toint
-from models import don,med,contact,user
+from models import don,med,contact,user,urgent
 bp=Blueprint("seller",__name__,url_prefix="/seller")
 @bp.route("/dashboard")
 @login_required
@@ -20,6 +20,7 @@ def donate():
         exp=f.get("expiry_date","").strip()
         cond=f.get("condition_status")
         cat=f.get("category_id","")
+        urg_id=toint(f.get("urgent_id")) or None
         if not name:
             flash("Medicine name is required.","danger")
             return redirect(url_for("seller.donate"))
@@ -34,10 +35,15 @@ def donate():
             flash("Medicines expiring in less than 60 days cannot be donated.","danger")
             return redirect(url_for("seller.donate"))
         mid=med.getid(name,int(cat) if cat.isdigit() else None)
-        don.create(current_user.user_id,mid,qty,f.get("batch_number","").strip(),exp,getcity(),f.get("locality","").strip(),cond)
-        flash("Medicine listing submitted! It is now live in inventory. NGO verification is optional and provides recommended batch status.","success")
+        did=don.create(current_user.user_id,mid,qty,f.get("batch_number","").strip(),exp,getcity(),f.get("locality","").strip(),cond)
+        matches=urgent.match_donation(did,mid,getcity(),qty,current_user.name,urg_id)
+        if matches>0:
+            flash(f"Medicine listing submitted! It matched {matches} open urgent shortage(s) in {getcity()} and alerted the waiting patient(s).","success")
+        else:
+            flash("Medicine listing submitted! It is now live in inventory. NGO verification is optional and provides recommended batch status.","success")
         return redirect(url_for("seller.mine"))
-    return render_template("seller/donate.html",categories=med.cats(),medicines=med.every())
+    open_needs=urgent.live(getcity())
+    return render_template("seller/donate.html",categories=med.cats(),medicines=med.every(),urgent_needs=open_needs)
 @bp.route("/donations")
 @login_required
 @needrole("seller","user")

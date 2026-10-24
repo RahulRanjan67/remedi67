@@ -87,3 +87,14 @@ def markexp(rows):
         nr["exp"]=expclass(nr.get("expiry_date"))
         out.append(nr)
     return out
+
+def make_qr_svg(data):
+    try:
+        import qrcode
+        import qrcode.image.svg
+        factory = qrcode.image.svg.SvgPathImage
+        img = qrcode.make(str(data).strip(), image_factory=factory, border=2)
+        return img.to_string().decode('utf-8')
+    except Exception:
+        clean = str(data)[:24]
+        return f'<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160"><rect width="160" height="160" fill="#f1f5f9" rx="8"/><text x="80" y="85" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#475569">QR: {clean}</text></svg>'

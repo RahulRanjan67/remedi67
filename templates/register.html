@@ -22,9 +22,10 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Account Role</label>
-                <div style="display:flex;gap:1.5rem;align-items:center;padding:0.25rem 0;">
-                    <label><input type="radio" name="role" value="user" checked> User (Donate &amp; Request)</label>
-                    <label><input type="radio" name="role" value="ngo"> NGO Partner</label>
+                <div style="display:flex;gap:1.25rem;align-items:center;padding:0.25rem 0;flex-wrap:wrap;">
+                    <label><input type="radio" name="role" value="user" checked onchange="toggleRoleFields()"> User (Citizen)</label>
+                    <label><input type="radio" name="role" value="ngo" onchange="toggleRoleFields()"> NGO Partner</label>
+                    <label><input type="radio" name="role" value="pharmacy" onchange="toggleRoleFields()"> Partner Pharmacy</label>
                 </div>
             </div>
             <div class="form-group">
@@ -59,8 +60,28 @@
                     <input type="text" name="registration_number" class="form-control" placeholder="e.g. NGO-REG-XXXX">
                 </div>
             </div>
+            <div id="pharmacy-fields" style="display:none;background:var(--bg);padding:1rem;border-radius:8px;margin-bottom:1rem;border:1px solid var(--border);">
+                <p class="text-muted" style="font-size:0.875rem;margin-bottom:1rem;">Pharmacy accounts serve as designated handover points for verified prescription medicine pickups.</p>
+                <div class="form-group">
+                    <label class="form-label">Pharmacy Name</label>
+                    <input type="text" name="pharmacy_name" class="form-control" placeholder="Official licensed pharmacy name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Storefront Address</label>
+                    <input type="text" name="pharmacy_address" class="form-control" placeholder="Full storefront address and landmark">
+                </div>
+            </div>
             <button type="submit" class="btn btn-primary" style="width:100%;margin-top:0.5rem;">Register</button>
         </form>
     </div>
 </div>
+<script>
+function toggleRoleFields() {
+    const roles = document.getElementsByName('role');
+    let sel = 'user';
+    for (const r of roles) { if (r.checked) sel = r.value; }
+    document.getElementById('ngo-fields').style.display = sel === 'ngo' ? 'block' : 'none';
+    document.getElementById('pharmacy-fields').style.display = sel === 'pharmacy' ? 'block' : 'none';
+}
+</script>
 {% endblock %}

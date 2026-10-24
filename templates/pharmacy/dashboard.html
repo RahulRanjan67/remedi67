@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Pharmacy Dispensary Console{% endblock %}
+{% block content %}
+<div class="container-wide" style="padding:1.5rem 1rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+        <div>
+            <h2>Dispensary Operations</h2>
+            {% if pharmacy %}
+            <p class="text-muted" style="margin:0;">
+                <strong>{{ pharmacy.name }}</strong> &bull; {{ pharmacy.address }} &bull; {{ pharmacy.city }} &bull; Phone: {{ pharmacy.phone }}
+            </p>
+            {% else %}
+            <p class="text-muted" style="margin:0;">No partner pharmacy record attached.</p>
+            {% endif %}
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+            <a href="{{ url_for('pharmacy.verify') }}" class="btn btn-primary btn-sm">📷 Scan / Verify Pickup Pass</a>
+            <a href="{{ url_for('common.search') }}" class="btn btn-secondary btn-sm">View Local Inventory</a>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem;">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total }}</div>
+            <div class="stat-label">Total Assigned</div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #f59e0b;">
+            <div class="stat-number" style="color:#d97706;">{{ stats.waiting }}</div>
+            <div class="stat-label">Awaiting Preparation</div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #3b82f6;">
+            <div class="stat-number" style="color:#2563eb;">{{ stats.ready }}</div>
+            <div class="stat-label">Ready for Pickup</div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #10b981;">
+            <div class="stat-number" style="color:#059669;">{{ stats.dispensed }}</div>
+            <div class="stat-label">Successfully Dispensed</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Medication Dispensary Queue</h3>
+        {% if requests %}
+        <div style="overflow-x:auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Req #</th>
+                        <th>Medicine</th>
+                        <th>Batch</th>
+                        <th>Qty</th>
+                        <th>Patient Name</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in requests %}
+                    <tr>
+                        <td><strong>#{{ r.request_id }}</strong></td>
+                        <td>
+                            <strong>{{ r.medicine_name }}</strong>
+                            <div class="text-muted" style="font-size:0.75rem;">Condition: {{ r.condition_status|capitalize or 'Sealed' }}</div>
+                        </td>
+                        <td><span style="font-family:monospace;font-size:0.85rem;">{{ r.batch_number or 'N/A' }}</span></td>
+                        <td><strong>{{ r.quantity_requested }}</strong></td>
+                        <td>{{ r.buyer_name }}</td>
+                        <td>{{ r.buyer_phone or r.buyer_email or 'On File' }}</td>
+                        <td>
+                            <span class="badge badge-{{ r.status }}">
+                                {{ r.status|upper }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:0.4rem;align-items:center;">
+                                <a href="{{ url_for('common.pass_req', rid=r.request_id) }}" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.5rem;font-size:0.75rem;" target="_blank">Pass</a>
+                                {% if r.status == 'approved' %}
+                                <form method="POST" action="{{ url_for('pharmacy.ready', rid=r.request_id) }}" style="margin:0;">
+                                    <button type="submit" class="btn btn-warning btn-sm" style="padding:0.25rem 0.5rem;font-size:0.75rem;">Ready</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('pharmacy.dispense', rid=r.request_id) }}" style="margin:0;">
+                                    <button type="submit" class="btn btn-success btn-sm" style="padding:0.25rem 0.5rem;font-size:0.75rem;">Dispense</button>
+                                </form>
+                                {% elif r.status == 'ready' %}
+                                <form method="POST" action="{{ url_for('pharmacy.dispense', rid=r.request_id) }}" style="margin:0;">
+                                    <button type="submit" class="btn btn-success btn-sm" style="padding:0.25rem 0.6rem;font-size:0.75rem;">Confirm Handover</button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted" style="font-size:0.8rem;">Completed</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted" style="text-align:center;padding:2rem 0;">No medication pickup requests currently assigned to this dispensary.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,12 +1,40 @@
 {% extends 'base.html' %}
+{% block title %}Donate Medicine{% endblock %}
 {% block content %}
-<div class="container" style="max-width:600px;margin-top:2rem;">
+<div class="container" style="max-width:640px;margin-top:2rem;margin-bottom:3rem;">
+    {% if urgent_needs %}
+    <div class="card" style="background:#fff8e6;border:1px solid #f6d365;margin-bottom:1.5rem;padding:1.25rem;">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+            <span style="font-size:1.2rem;">🚨</span>
+            <h4 style="margin:0;color:#855d00;font-size:1rem;font-weight:700;">Open Urgent Shortages in {{ current_user.city }}</h4>
+        </div>
+        <p style="font-size:0.85rem;color:#705304;margin-bottom:0.75rem;">Waiting patients in your city need these medicines immediately. Click "Fulfill" to auto-fill your donation listing:</p>
+        <div style="display:flex;flex-direction:column;gap:0.4rem;">
+            {% for u in urgent_needs[:4] %}
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;padding:0.45rem 0.75rem;border-radius:6px;border:1px solid #fae19c;font-size:0.85rem;">
+                <div>
+                    <strong>{{ u.medicine_name }}</strong> &bull; Need: <strong>{{ u.quantity_required }}</strong>
+                    <span class="text-muted">({{ u.locality }})</span>
+                </div>
+                <a href="{{ url_for('seller.donate', med=u.medicine_name, qty=u.quantity_required, urgent_id=u.urgent_id) }}" class="btn btn-sm btn-outline-danger" style="padding:0.2rem 0.6rem;font-size:0.75rem;">Fulfill Need</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <div class="card">
         <h2>Donate Medicine</h2>
         <form method="POST" action="{{ url_for('seller.donate') }}">
+            {% if request.args.get('urgent_id') %}
+            <input type="hidden" name="urgent_id" value="{{ request.args.get('urgent_id') }}">
+            <div style="background:#e8f4fd;border-left:4px solid #1976d2;padding:0.6rem 0.8rem;margin-bottom:1rem;border-radius:4px;font-size:0.85rem;color:#0d47a1;">
+                Targeting Urgent Need #{{ request.args.get('urgent_id') }}. When listed, the waiting patient will be notified immediately.
+            </div>
+            {% endif %}
             <div class="form-group">
                 <label class="form-label">Medicine Name</label>
-                <input type="text" name="medicine_name" list="meds" class="form-control" required>
+                <input type="text" name="medicine_name" list="meds" class="form-control" value="{{ request.args.get('med', '') }}" required>
                 <datalist id="meds">{% for m in medicines %}<option value="{{ m.medicine_name }}">{% endfor %}</datalist>
             </div>
             <div class="form-group">
@@ -18,11 +46,11 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Quantity</label>
-                <input type="number" name="quantity" min="1" class="form-control" required>
+                <input type="number" name="quantity" min="1" value="{{ request.args.get('qty', '') }}" class="form-control" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Batch Number</label>
-                <input type="text" name="batch_number" class="form-control" required>
+                <input type="text" name="batch_number" class="form-control" placeholder="e.g. BATCH-2026-X" required>
             </div>
             <div class="form-group">
                 <label class="form-label">Expiry Date</label>
@@ -41,7 +69,7 @@
                 <label class="form-label">Locality</label>
                 <input type="text" name="locality" class="form-control" value="{{ current_user.locality or '' }}" required>
             </div>
-            <p class="text-muted">City: {{ current_user.city }} (donations are posted in your registered city)</p>
+            <p class="text-muted" style="font-size:0.85rem;">City: {{ current_user.city }} (donations are posted in your registered city)</p>
             <button type="submit" class="btn btn-primary" style="width:100%;">Submit Donation</button>
         </form>
     </div>

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Verify Pickup Pass{% endblock %}
+{% block content %}
+<div class="container" style="max-width:640px;margin:2rem auto;padding:0 1rem;">
+    <div style="margin-bottom:1.5rem;">
+        <a href="{{ url_for('pharmacy.dash') }}" class="btn btn-secondary btn-sm">&larr; Back to Dispensary</a>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+        <h3>Verify Patient Pickup Pass</h3>
+        <p class="text-muted" style="font-size:0.85rem;">Scan the patient's QR pass or enter the numeric Request ID to verify and dispense medication.</p>
+        <form method="POST" action="{{ url_for('pharmacy.verify') }}" style="display:flex;gap:0.5rem;align-items:center;">
+            <input type="number" name="request_id" value="{{ searched_id }}" placeholder="Enter Request # (e.g. 1)" class="form-control" autofocus required>
+            <button type="submit" class="btn btn-primary" style="white-space:nowrap;">Lookup Pass</button>
+        </form>
+    </div>
+
+    {% if record %}
+    <div class="card" style="border:2px solid {% if record.status in ['approved', 'ready'] %}var(--primary){% elif record.status == 'completed' %}#10b981{% else %}#ef4444{% endif %};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--border);padding-bottom:1rem;margin-bottom:1rem;">
+            <div>
+                <h4 style="margin:0 0 0.25rem;">Pass #REQ-{{ '%05d'|format(record.request_id or 0) }}</h4>
+                <small class="text-muted">Requested on {{ record.created_at }}</small>
+            </div>
+            <div>
+                <span class="badge badge-{{ record.status }}" style="font-size:0.9rem;padding:0.35rem 0.75rem;">
+                    {{ record.status|upper }}
+                </span>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+            <div>
+                <label class="text-muted" style="font-size:0.75rem;text-transform:uppercase;font-weight:600;">Medication</label>
+                <div style="font-size:1.1rem;font-weight:700;">{{ record.medicine_name }}</div>
+            </div>
+            <div>
+                <label class="text-muted" style="font-size:0.75rem;text-transform:uppercase;font-weight:600;">Quantity</label>
+                <div style="font-size:1.1rem;font-weight:700;">{{ record.quantity_requested }} Units</div>
+            </div>
+            <div>
+                <label class="text-muted" style="font-size:0.75rem;text-transform:uppercase;font-weight:600;">Patient Recipient</label>
+                <div style="font-weight:600;">{{ record.buyer_name }}</div>
+                <small class="text-muted">{{ record.buyer_phone or record.buyer_email or 'No phone on file' }}</small>
+            </div>
+            <div>
+                <label class="text-muted" style="font-size:0.75rem;text-transform:uppercase;font-weight:600;">Pickup Location</label>
+                <div style="font-weight:600;">{{ record.pharmacy_name or 'Dispensary' }}</div>
+                <small class="text-muted">{{ record.city }}</small>
+            </div>
+        </div>
+
+        {% if record.status in ['approved', 'ready'] %}
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end;border-top:1px solid var(--border);padding-top:1rem;">
+            {% if record.status == 'approved' %}
+            <form method="POST" action="{{ url_for('pharmacy.ready', rid=record.request_id) }}" style="margin:0;">
+                <button type="submit" class="btn btn-warning">Mark Ready for Patient</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('pharmacy.dispense', rid=record.request_id) }}" style="margin:0;">
+                <button type="submit" class="btn btn-success">Confirm Handover &amp; Dispense</button>
+            </form>
+        </div>
+        {% elif record.status == 'completed' %}
+        <div class="alert alert-success" style="margin:0;">
+            ✓ This medication has already been dispensed and recorded in the audit registry.
+        </div>
+        {% else %}
+        <div class="alert alert-danger" style="margin:0;">
+            ✕ This request is currently in status "{{ record.status }}" and cannot be dispensed.
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Pickup Pass #{{ r.request_id }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:650px;margin:2rem auto;padding:0 1rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.5rem;">
+        {% if current_user.role == 'pharmacy' %}
+        <a href="{{ url_for('pharmacy.dash') }}" class="btn btn-secondary btn-sm">&larr; Back to Dispensary</a>
+        {% elif current_user.role == 'ngo' %}
+        <a href="{{ url_for('ngo.manage') }}" class="btn btn-secondary btn-sm">&larr; Back to Requests</a>
+        {% else %}
+        <a href="{{ url_for('buyer.reqs') }}" class="btn btn-secondary btn-sm">&larr; Back to Requests</a>
+        {% endif %}
+        <button onclick="window.print()" class="btn btn-primary btn-sm">Print / Save Pass</button>
+    </div>
+
+    <div class="card" style="border:2px solid var(--primary);box-shadow:0 4px 14px rgba(0,0,0,0.08);padding:2rem;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px dashed var(--border);padding-bottom:1.5rem;margin-bottom:1.5rem;">
+            <div>
+                <span class="badge badge-info" style="font-size:0.8rem;letter-spacing:0.05em;text-transform:uppercase;">ReMedi Pickup Pass</span>
+                <h3 style="margin:0.5rem 0 0.25rem;">Pass #REQ-{{ '%05d'|format(r.request_id or 0) }}</h3>
+                <small class="text-muted">Issued: {{ r.created_at }}</small>
+            </div>
+            <div style="text-align:right;">
+                <span class="badge badge-{{ r.status|lower }}" style="font-size:0.9rem;padding:0.4rem 0.8rem;">
+                    {{ r.status|upper }}
+                </span>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:2rem;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+            <div style="flex:1;min-width:240px;">
+                <div style="margin-bottom:1rem;">
+                    <label class="text-muted" style="font-size:0.8rem;text-transform:uppercase;font-weight:600;">Prescribed Medicine</label>
+                    <div style="font-size:1.25rem;font-weight:700;color:var(--text);">{{ r.medicine_name }}</div>
+                    <small class="text-muted">{{ r.category_name or 'Essential Medicine' }} &bull; Condition: {{ r.condition_status|capitalize or 'Sealed' }}</small>
+                </div>
+
+                <div style="margin-bottom:1rem;">
+                    <label class="text-muted" style="font-size:0.8rem;text-transform:uppercase;font-weight:600;">Authorized Quantity</label>
+                    <div style="font-size:1.1rem;font-weight:600;">{{ r.quantity_requested }} Units</div>
+                </div>
+
+                <div style="margin-bottom:1rem;">
+                    <label class="text-muted" style="font-size:0.8rem;text-transform:uppercase;font-weight:600;">Authorized Recipient</label>
+                    <div style="font-weight:600;">{{ r.buyer_name }}</div>
+                    <small class="text-muted">Contact: {{ r.buyer_phone or 'On File' }}</small>
+                </div>
+
+                <div>
+                    <label class="text-muted" style="font-size:0.8rem;text-transform:uppercase;font-weight:600;">Designated Collection Point</label>
+                    {% if r.fetch_method == 'pharmacy' %}
+                        <div style="font-weight:600;">{{ r.pharmacy_name }}</div>
+                        <small class="text-muted">{{ r.pharmacy_address }} ({{ r.city }})</small>
+                    {% elif r.fetch_method == 'ngo' %}
+                        <div style="font-weight:600;">{{ r.ngo_name or 'Designated NGO Care Center' }}</div>
+                        <small class="text-muted">Verified Community Hub &bull; {{ r.city }}</small>
+                    {% else %}
+                        <div style="font-weight:600;">Direct Exchange Point</div>
+                        <small class="text-muted">{{ r.city }}</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="text-align:center;padding:1rem;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+                <img src="{{ url_for('common.qr_req', rid=r.request_id) }}" alt="Pickup QR Code" style="width:160px;height:160px;display:block;margin:0 auto;">
+                <small class="text-muted" style="display:block;margin-top:0.5rem;font-size:0.75rem;">Scan to Verify &amp; Dispense</small>
+            </div>
+        </div>
+
+        {% if current_user.role in ['pharmacy', 'ngo', 'admin', 'developer'] and r.status in ['approved', 'ready'] %}
+        <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);display:flex;gap:0.75rem;justify-content:flex-end;align-items:center;">
+            {% if r.status == 'approved' and current_user.role == 'pharmacy' %}
+            <form method="POST" action="{{ url_for('pharmacy.ready', rid=r.request_id) }}" style="margin:0;">
+                <button type="submit" class="btn btn-warning btn-sm">Mark Ready for Pickup</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{% if current_user.role == 'pharmacy' %}{{ url_for('pharmacy.dispense', rid=r.request_id) }}{% elif current_user.role == 'ngo' %}{{ url_for('ngo.finish', rid=r.request_id) }}{% else %}{{ url_for('pharmacy.dispense', rid=r.request_id) }}{% endif %}" style="margin:0;">
+                <button type="submit" class="btn btn-success btn-sm">Confirm Handover &amp; Dispense</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:1.5rem;padding:0.85rem;background:#f1f5f9;border-radius:8px;font-size:0.85rem;color:#475569;">
+            <strong>Instructions for Dispensing Officer:</strong> Scan this QR code or cross-reference Request #REQ-{{ '%05d'|format(r.request_id or 0) }} to confirm medication release in the platform registry.
+        </div>
+    </div>
+</div>
+{% endblock %}

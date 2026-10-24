@@ -1,7 +1,7 @@
 from flask import Blueprint,render_template,request,redirect,url_for,flash,session
 from flask_login import login_user,logout_user,current_user
 from werkzeug.security import check_password_hash,generate_password_hash
-from models import user,ngo
+from models import user,ngo,pharm
 from util import fixcity,setcity,getcity
 import config
 bp=Blueprint("auth",__name__,url_prefix="/auth")
@@ -40,7 +40,7 @@ def register():
         phone=f.get("phone","").strip() or None
         pin=f.get("pincode","").strip() or None
         loc=f.get("locality","").strip() or None
-        if role not in("user","ngo"):
+        if role not in("user","ngo","pharmacy"):
             flash("Invalid role selected.","danger")
             return redirect(url_for("auth.register"))
         if not name or not email or not pw or not city:
@@ -65,6 +65,11 @@ def register():
         if role=="ngo":
             ngo.create(uid,f.get("ngo_name") or name,f.get("registration_number"),city,loc)
             flash("Registration submitted! Your NGO account is pending admin approval.","success")
+        elif role=="pharmacy":
+            pname=f.get("pharmacy_name") or f"{name} Dispensary"
+            paddr=f.get("pharmacy_address") or loc or f"Central {city}"
+            pharm.create(pname,paddr,city,pin or "000000",phone,uid)
+            flash("Registration successful! You can now log in to the dispensary portal.","success")
         else:
             flash("Registration successful! You can now log in.","success")
         return redirect(url_for("auth.login"))
